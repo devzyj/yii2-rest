@@ -1,0 +1,29 @@
+{
+    "name": "devzyj/yii2-rest",
+    "description": "The refactor and extension for `yiisoft/yii2-rest`.",
+    "keywords": ["yii2", "rest", "api"],
+    "type": "yii2-extension",
+    "license": "BSD-3-Clause",
+    "authors": [
+        {
+            "name": "Jerry Zhang",
+            "email": "zhangyanjiong@163.com"
+        }
+    ],
+    "require": {
+        "yiisoft/yii2": "*"
+    },
+    "require-dev": {
+        "codeception/codeception": "~2.5"
+    },
+    "autoload": {
+        "psr-4": {
+            "devzyj\\rest\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "devzyj\\rest\\tests\\": "tests/"
+        }
+    }
+}
