@@ -66,6 +66,31 @@ class ActiveController extends \yii\rest\ActiveController
                 'checkModelAccess' => [$this, 'checkModelAccess'],
                 'notFoundMessage' => $this->notFoundMessage,
             ],
+            'create-validate' => [
+                'class' => 'devzyj\rest\CreateValidateAction',
+                'modelClass' => $this->modelClass,
+                'checkAccess' => [$this, 'checkAccess'],
+                'scenario' => $this->createScenario,
+            ],
+            'update-validate' => [
+                'class' => 'devzyj\rest\UpdateValidateAction',
+                'modelClass' => $this->modelClass,
+                'checkAccess' => [$this, 'checkAccess'],
+                'scenario' => $this->updateScenario,
+                'checkModelAccess' => [$this, 'checkModelAccess'],
+                'notFoundMessage' => $this->notFoundMessage,
+            ],
+        ]);
+    }
+    
+    /**
+     * {@inheritdoc}
+     */
+    protected function verbs()
+    {
+        return ArrayHelper::merge(parent::verbs(), [
+            'create-validate' => ['POST'],
+            'update-validate' => ['PUT', 'PATCH'],
         ]);
     }
     
