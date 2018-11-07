@@ -23,8 +23,9 @@ class DeleteAction extends Action
      * 该方法依次执行以下步骤：
      * 1. 当设置了 [[$checkAccess]] 时，调用该回调方法检查动作权限；
      * 2. 调用 [[findModel()]]，查找数据模型；
-     * 3. 当设置了 [[$checkModelAccess]] 时，调用该回调方法检查模型权限；
-     * 4. 调用 [[afterPrepareModel()]]，触发 [[EVENT_AFTER_PREPARE_MODEL]] 事件；
+     * 3. 调用 [[afterPrepareModel()]]，触发 [[EVENT_AFTER_PREPARE_MODEL]] 事件；
+     * 4. 当设置了 [[$checkModelAccess]] 时，调用该回调方法检查模型权限；
+     * 5. 调用 [[deleteModel()]]，删除模型；
      * 5. 删除成功时调用 [[afterProcessModel()]]，触发 [[EVENT_AFTER_PROCESS_MODEL]] 事件；
      * 
      * @param string $id 模型的主键。
@@ -32,14 +33,26 @@ class DeleteAction extends Action
      */
     public function run($id)
     {
+        // 检查动作权限。
         if ($this->checkAccess) {
             call_user_func($this->checkAccess, $this);
         }
 
+        // 准备模型。
         $model = $this->prepareModel($id);
+        
+        // 检查模型权限。
+        if ($this->checkModelAccess) {
+            call_user_func($this->checkModelAccess, $model, $this);
+        }
+        
+        // 删除模型。
         $this->deleteModel($model);
-        Yii::$app->getResponse()->setStatusCode(204);
+        
+        // 删除成功后设置响应码。
+        $this->response->setStatusCode(204);
 
+        // 调用删除成功后的方法和事件。
         $this->afterProcessModel($model);
     }
     

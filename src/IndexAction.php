@@ -61,15 +61,18 @@ class IndexAction extends Action
      */
     public function run()
     {
+        // 检查动作权限。
         if ($this->checkAccess) {
             call_user_func($this->checkAccess, $this);
         }
 
-        $params = Yii::$app->getRequest()->getBodyParams();
+        // 获取请求参数。
+        $params = $this->request->getBodyParams();
         if (empty($params)) {
-            $params = Yii::$app->getRequest()->getQueryParams();
+            $params = $this->request->getQueryParams();
         }
 
+        // 构造过滤条件。
         $filter = null;
         if ($this->dataFilter) {
             $this->dataFilter = Yii::createObject($this->dataFilter);
@@ -81,6 +84,7 @@ class IndexAction extends Action
             }
         }
         
+        // 准备并且返回数据源。
         return $this->prepareDataProvider($params, $filter);
     }
 

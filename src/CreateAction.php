@@ -25,7 +25,7 @@ class CreateAction extends Action
     public $scenario = Model::SCENARIO_DEFAULT;
     
     /**
-     * @var string 视图操作的名称。当模型成功创建时，需要使用此属性创建 URL。
+     * @var string|false 视图操作的名称。当模型成功创建时，需要使用此属性创建 URL。`false` 表示不创建 URL。
      */
     public $viewAction = 'view';
 
@@ -35,30 +35,48 @@ class CreateAction extends Action
      * 该方法依次执行以下步骤：
      * 1. 当设置了 [[$checkAccess]] 时，调用该回调方法检查动作权限；
      * 2. 调用 [[afterLoadModel()]]，触发 [[EVENT_AFTER_LOAD_MODEL]] 事件；
-     * 3. 创建成功时调用 [[afterProcessModel()]]，触发 [[EVENT_AFTER_PROCESS_MODEL]] 事件；
+     * 3. 调用 [[createModel()]]，创建模型；
+     * 4. 创建成功时调用 [[afterProcessModel()]]，触发 [[EVENT_AFTER_PROCESS_MODEL]] 事件；
      * 
      * @return \yii\db\ActiveRecordInterface 新创建的模型。
      * @throws \yii\web\ServerErrorHttpException 在创建模型时出现错误。
      */
     public function run()
     {
+        // 检查动作权限。
         if ($this->checkAccess) {
             call_user_func($this->checkAccess, $this);
         }
         
         /* @var $model \yii\db\BaseActiveRecord */
         $model = Yii::createObject($this->modelClass);
-        $params = Yii::$app->getRequest()->getBodyParams();
-        $model = $this->loadModel($model, $params, $this->scenario);
+        
+        // 获取请求参数。
+        $params = $this->request->getBodyParams();
+        
+        // 设置场景。
+        $model->setScenario($this->scenario);
+        
+        // 加载数据。
+        $model = $this->loadModel($model, $params);
+        
+        // 创建模型。
         if ($this->createModel($model)) {
-            $response = Yii::$app->getResponse();
-            $response->setStatusCode(201);
-            $id = implode(',', array_values($model->getPrimaryKey(true)));
-            $response->getHeaders()->set('Location', Url::toRoute([$this->viewAction, 'id' => $id], true));
-
+            // 创建成功。
+            // 设置响应码。
+            $this->response->setStatusCode(201);
+            
+            // 设置响应头。
+            if ($this->viewAction !== false) {
+                $id = implode(',', array_values($model->getPrimaryKey(true)));
+                $this->response->getHeaders()->set('Location', Url::toRoute([$this->viewAction, 'id' => $id], true));
+            }
+            
+            // 调用创建成功后的方法和事件。
             $this->afterProcessModel($model);
         }
         
+        // 返回模型。
         return $model;
     }
     

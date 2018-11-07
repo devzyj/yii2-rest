@@ -28,23 +28,39 @@ class CreateValidateAction extends Action
      * 该方法依次执行以下步骤：
      * 1. 当设置了 [[$checkAccess]] 时，调用该回调方法检查动作权限；
      * 2. 调用 [[afterLoadModel()]]，触发 [[EVENT_AFTER_LOAD_MODEL]] 事件；
+     * 3. 调用 [[validateModel()]]，验证模型；
      * 
      * @return \yii\db\ActiveRecordInterface|null 验证时有错误的模型。没有错误时返回 `null`。
      */
     public function run()
     {
+        // 检查动作权限。
         if ($this->checkAccess) {
             call_user_func($this->checkAccess, $this);
         }
 
+        /* @var $model \yii\db\BaseActiveRecord */
         $model = Yii::createObject($this->modelClass);
-        $params = Yii::$app->getRequest()->getBodyParams();
-        $model = $this->loadModel($model, $params, $this->scenario);
+
+        // 获取请求参数。
+        $params = $this->request->getBodyParams();
+        
+        // 设置场景。
+        $model->setScenario($this->scenario);
+        
+        // 加载数据。
+        $model = $this->loadModel($model, $params);
+
+        // 验证模型。
         if ($this->validateModel($model)) {
-            Yii::$app->getResponse()->setStatusCode(204);
+            // 验证成功，设置响应码。
+            $this->response->setStatusCode(204);
+            
+            // 返回空结果。
             return;
         }
         
+        // 返回验证错误的模型。
         return $model;
     }
     

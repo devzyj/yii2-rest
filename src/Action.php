@@ -38,16 +38,61 @@ class Action extends \yii\rest\Action
     const EVENT_AFTER_PREPARE_DATA_PROVIDER = 'afterPrepareDataProvider';
     
     /**
+     * @var callable 检查动作权限的回调方法。
+     * 回调方法没有返回值，如果没有权限，则抛出一个异常。
+     * 
+     * ```php
+     * function ($action, $params = []) {
+     *     // $action 正在执行的动作。
+     *     // $params 额外的参数。
+     * }
+     * ```
+     */
+    public $checkAccess;
+    
+    /**
+     * @var callable 检查模型权限的回调方法。
+     * 回调方法没有返回值，如果没有权限，则抛出一个异常。
+     *
+     * ```php
+     * function ($model, $action, $params = []) {
+     *     // $model 需要检查的模型。
+     *     // $action 正在执行的动作。
+     *     // $params 额外的参数。
+     * }
+     * ```
+     */
+    public $checkModelAccess;
+    
+    /**
      * @var string 模型不存在时的错误信息，支持变量 `{id}`。
      * @see findModel()
      */
     public $notFoundMessage;
+    
+    /**
+     * @var \yii\web\Request 当前的请求。如果没有设置，将使用 `Yii::$app->getRequest()`。
+     */
+    public $request;
+    
+    /**
+     * @var \yii\web\Response 要发送的响应。如果没有设置，将使用 `Yii::$app->getResponse()`。
+     */
+    public $response;
 
     /**
      * {@inheritdoc}
      */
     public function init()
     {
+        if ($this->request === null) {
+            $this->request = Yii::$app->getRequest();
+        }
+        
+        if ($this->response === null) {
+            $this->response = Yii::$app->getResponse();
+        }
+        
         if ($this->notFoundMessage === null) {
             $this->notFoundMessage = 'Object not found: {id}';
         }
@@ -94,8 +139,7 @@ class Action extends \yii\rest\Action
      * 
      * 该方法依次执行以下步骤：
      * 1. 调用 [[findModel()]]，查找数据模型；
-     * 2. 当设置了 [[$checkModelAccess]] 时，调用该回调方法检查模型权限；
-     * 3. 调用 [[afterPrepareModel()]]，触发 [[EVENT_AFTER_PREPARE_MODEL]] 事件；
+     * 2. 调用 [[afterPrepareModel()]]，触发 [[EVENT_AFTER_PREPARE_MODEL]] 事件；
      * 
      * @param string $id 模型的ID。
      * @return \yii\db\ActiveRecordInterface 查找到的数据模型。
@@ -105,11 +149,6 @@ class Action extends \yii\rest\Action
         // 根据给定的主键查询数据模型。
         $model = $this->findModel($id);
         
-        // 检查模型权限。
-        if ($this->checkModelAccess) {
-            call_user_func($this->checkModelAccess, $model, $this);
-        }
-
         // 执行在准备完模型后的方法和事件。
         $this->afterPrepareModel($model);
 
@@ -137,22 +176,15 @@ class Action extends \yii\rest\Action
      * 为模型加载数据。
      * 
      * 该方法依次执行以下步骤：
-     * 1. 调用 [[$model::setScenario()]]；
-     * 2. 调用 [[$model::load()]]；
-     * 3. 调用 [[afterLoadModel()]]，触发 [[EVENT_AFTER_LOAD_MODEL]] 事件；
+     * 1. 调用 [[$model::load()]]；
+     * 2. 调用 [[afterLoadModel()]]，触发 [[EVENT_AFTER_LOAD_MODEL]] 事件；
      * 
      * @param \yii\base\Model $model 需要加载数据的模型。
      * @param array $data 需要加载的数据。
-     * @param string $scenario 加载数据时的场景。
      * @return \yii\base\Model 加载完数据后的模型。
      */
-    public function loadModel($model, $data, $scenario = null)
+    public function loadModel($model, $data)
     {
-        // 设置场景。
-        if ($scenario !== null) {
-            $model->setScenario($scenario);
-        }
-        
         // 加载数据。
         $model->load($data, '');
         
