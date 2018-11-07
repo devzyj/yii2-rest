@@ -20,12 +20,19 @@ class UrlRule extends \yii\rest\UrlRule
     public $tokens = [
         '{id}' => '<id:\\d[\\d,]*>',
         '{validate}' => 'validate',
+        '{ids}' => '<ids:\\d[\\d,]*;[\\d,;]*>',
+        '{batch}' => 'batch',
     ];
 
     /**
      * {@inheritdoc}
      */
     public $patterns = [
+        'PUT,PATCH {batch}' => 'batch-update',
+        'DELETE {ids}' => 'batch-delete',
+        'GET,HEAD {ids}' => 'batch-view',
+        'POST {batch}' => 'batch-create',
+        
         'PUT,PATCH {id}/{validate}' => 'update-validate',
         'POST {validate}' => 'create-validate',
         

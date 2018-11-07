@@ -33,7 +33,15 @@ class ViewAction extends Action
             call_user_func($this->checkAccess, $this);
         }
 
-        // 准备并且返回模型。
-        return $this->prepareModel($id);
+        // 准备模型。
+        $model = $this->prepareModel($id);
+
+        // 检查模型权限。
+        if ($this->checkModelAccess) {
+            call_user_func($this->checkModelAccess, $model, $this);
+        }
+        
+        // 返回模型。
+        return $model;
     }
 }

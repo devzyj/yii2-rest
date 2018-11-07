@@ -32,8 +32,9 @@ class UpdateAction extends Action
      * 3. 调用 [[afterPrepareModel()]]，触发 [[EVENT_AFTER_PREPARE_MODEL]] 事件；
      * 4. 当设置了 [[$checkModelAccess]] 时，调用该回调方法检查模型权限；
      * 5. 调用 [[afterLoadModel()]]，触发 [[EVENT_AFTER_LOAD_MODEL]] 事件；
-     * 6. 调用 [[updateModel()]]，更新模型；
-     * 7. 更新成功时调用 [[afterProcessModel()]]，触发 [[EVENT_AFTER_PROCESS_MODEL]] 事件；
+     * 6. 调用 [[beforeProcessModel()]]，触发 [[EVENT_BEFORE_PROCESS_MODEL]] 事件，如果方法返回 `false`，则跳过后续的处理；
+     * 7. 调用 [[updateModel()]]，更新模型；
+     * 8. 更新成功时调用 [[afterProcessModel()]]，触发 [[EVENT_AFTER_PROCESS_MODEL]] 事件；
      * 
      * @param string $id 模型的主键。
      * @return \yii\db\ActiveRecordInterface 正在更新的模型。
@@ -63,13 +64,28 @@ class UpdateAction extends Action
         // 加载数据。
         $model = $this->loadModel($model, $params);
         
-        // 更新模型。
-        if ($this->updateModel($model)) {
-            // 调用更新成功后的方法和事件。
-            $this->afterProcessModel($model);
+        // 处理并且返回结果。
+        return $this->processModel($model);
+    }
+    
+    /**
+     * 处理模型。
+     * 
+     * @param \yii\db\BaseActiveRecord $model 需要更新的模型。
+     * @return \yii\db\BaseActiveRecord 处理后的模型。
+     */
+    protected function processModel($model)
+    {
+        // 调用更新模型前的方法和事件。
+        if ($this->beforeProcessModel($model)) {
+            // 更新模型。
+            if ($this->updateModel($model)) {
+                // 调用更新成功后的方法和事件。
+                $this->afterProcessModel($model);
+            }
         }
-
-        // 返回模型。
+        
+        // 返回处理后的模型。
         return $model;
     }
     
@@ -86,8 +102,8 @@ class UpdateAction extends Action
             return true;
         } elseif ($model->hasErrors()) {
             return false;
-        } else {
-            throw new ServerErrorHttpException('Failed to update the object for unknown reason.');
         }
+        
+        throw new ServerErrorHttpException('Failed to update the object for unknown reason.');
     }
 }

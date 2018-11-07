@@ -25,8 +25,9 @@ class DeleteAction extends Action
      * 2. 调用 [[findModel()]]，查找数据模型；
      * 3. 调用 [[afterPrepareModel()]]，触发 [[EVENT_AFTER_PREPARE_MODEL]] 事件；
      * 4. 当设置了 [[$checkModelAccess]] 时，调用该回调方法检查模型权限；
-     * 5. 调用 [[deleteModel()]]，删除模型；
-     * 5. 删除成功时调用 [[afterProcessModel()]]，触发 [[EVENT_AFTER_PROCESS_MODEL]] 事件；
+     * 5. 调用 [[beforeProcessModel()]]，触发 [[EVENT_BEFORE_PROCESS_MODEL]] 事件，如果方法返回 `false`，则跳过后续的处理；
+     * 6. 调用 [[deleteModel()]]，删除模型；
+     * 7. 删除成功时调用 [[afterProcessModel()]]，触发 [[EVENT_AFTER_PROCESS_MODEL]] 事件；
      * 
      * @param string $id 模型的主键。
      * @throws \yii\web\ServerErrorHttpException 删除模型时有错误。
@@ -46,14 +47,28 @@ class DeleteAction extends Action
             call_user_func($this->checkModelAccess, $model, $this);
         }
         
-        // 删除模型。
-        $this->deleteModel($model);
-        
-        // 删除成功后设置响应码。
-        $this->response->setStatusCode(204);
-
-        // 调用删除成功后的方法和事件。
-        $this->afterProcessModel($model);
+        // 处理模型。
+        $this->processModel($model);
+    }
+    
+    /**
+     * 处理模型。
+     * 
+     * @param \yii\db\BaseActiveRecord $model 需要删除的模型。
+     */
+    protected function processModel($model)
+    {
+        // 调用删除模型前的方法和事件。
+        if ($this->beforeProcessModel($model)) {
+            // 删除模型。
+            $this->deleteModel($model);
+            
+            // 删除成功后设置响应码。
+            $this->response->setStatusCode(204);
+    
+            // 调用删除成功后的方法和事件。
+            $this->afterProcessModel($model);
+        }
     }
     
     /**

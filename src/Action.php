@@ -28,6 +28,12 @@ class Action extends \yii\rest\Action
     const EVENT_AFTER_LOAD_MODEL = 'afterLoadModel';
 
     /**
+     * @event ActionEvent 在处理模型前触发的事件。
+     * 设置 [[ActionEvent::isValid]] 为 `false`，可以停止之后的处理。
+     */
+    const EVENT_BEFORE_PROCESS_MODEL = 'beforeProcessModel';
+    
+    /**
      * @event ActionEvent 在处理完模型后触发的事件。
      */
     const EVENT_AFTER_PROCESS_MODEL = 'afterProcessModel';
@@ -85,6 +91,10 @@ class Action extends \yii\rest\Action
      */
     public function init()
     {
+        if ($this->notFoundMessage === null) {
+            $this->notFoundMessage = 'Object not found: {id}';
+        }
+
         if ($this->request === null) {
             $this->request = Yii::$app->getRequest();
         }
@@ -93,10 +103,6 @@ class Action extends \yii\rest\Action
             $this->response = Yii::$app->getResponse();
         }
         
-        if ($this->notFoundMessage === null) {
-            $this->notFoundMessage = 'Object not found: {id}';
-        }
-    
         parent::init();
     }
 
@@ -135,7 +141,7 @@ class Action extends \yii\rest\Action
     }
     
     /**
-     * 根据给定的主键准备数据模型。
+     * 根据指定的主键准备数据模型。
      * 
      * 该方法依次执行以下步骤：
      * 1. 调用 [[findModel()]]，查找数据模型；
@@ -194,7 +200,7 @@ class Action extends \yii\rest\Action
         // 返回模型。
         return $model;
     }
-    
+
     /**
      * 在模型加载完数据后调用此方法。
      * 默认实现了触发 [[EVENT_AFTER_LOAD_MODEL]] 事件。
@@ -209,6 +215,24 @@ class Action extends \yii\rest\Action
         ]);
     
         $this->trigger(self::EVENT_AFTER_LOAD_MODEL, $event);
+    }
+
+    /**
+     * 在处理模型前调用此方法。
+     * 默认实现了触发 [[EVENT_BEFORE_PROCESS_MODEL]] 事件。
+     *
+     * @param object $object 对像实例。
+     * @return boolean 动作是否有效。
+     */
+    public function beforeProcessModel($object)
+    {
+        $event = Yii::createObject([
+            'class' => ActionEvent::className(),
+            'object' => $object,
+        ]);
+    
+        $this->trigger(self::EVENT_BEFORE_PROCESS_MODEL, $event);
+        return $event->isValid;
     }
     
     /**

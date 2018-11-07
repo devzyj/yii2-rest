@@ -31,7 +31,8 @@ class UpdateValidateAction extends Action
      * 3. 调用 [[afterPrepareModel()]]，触发 [[EVENT_AFTER_PREPARE_MODEL]] 事件；
      * 4. 当设置了 [[$checkModelAccess]] 时，调用该回调方法检查模型权限；
      * 5. 调用 [[afterLoadModel()]]，触发 [[EVENT_AFTER_LOAD_MODEL]] 事件；
-     * 6. 调用 [[validateModel()]]，验证模型；
+     * 6. 调用 [[beforeProcessModel()]]，触发 [[EVENT_BEFORE_PROCESS_MODEL]] 事件，如果方法返回 `false`，则跳过后续的处理；
+     * 7. 调用 [[validateModel()]]，验证模型；
      * 
      * @param string $id 模型主键。
      * @return \yii\db\ActiveRecordInterface|null 验证时有错误的模型。没有错误时返回 `null`。
@@ -60,13 +61,28 @@ class UpdateValidateAction extends Action
         // 加载数据。
         $model = $this->loadModel($model, $params);
         
-        // 验证模型。
-        if ($this->validateModel($model)) {
-            // 验证成功，设置响应码。
-            $this->response->setStatusCode(204);
-            
-            // 返回空结果。
-            return;
+        // 处理并且返回结果。
+        return $this->processModel($model);
+    }
+    
+    /**
+     * 处理模型。
+     * 
+     * @param \yii\db\BaseActiveRecord $model 需要验证的模型。
+     * @return \yii\db\BaseActiveRecord|null 验证时有错误的模型。没有错误时返回 `null`。
+     */
+    protected function processModel($model)
+    {
+        // 调用验证模型前的方法和事件。
+        if ($this->beforeProcessModel($model)) {
+            // 验证模型。
+            if ($this->validateModel($model)) {
+                // 验证成功，设置响应码。
+                $this->response->setStatusCode(204);
+                
+                // 返回空结果。
+                return;
+            }
         }
 
         // 返回验证错误的模型。

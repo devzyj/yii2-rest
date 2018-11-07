@@ -35,8 +35,9 @@ class CreateAction extends Action
      * 该方法依次执行以下步骤：
      * 1. 当设置了 [[$checkAccess]] 时，调用该回调方法检查动作权限；
      * 2. 调用 [[afterLoadModel()]]，触发 [[EVENT_AFTER_LOAD_MODEL]] 事件；
-     * 3. 调用 [[createModel()]]，创建模型；
-     * 4. 创建成功时调用 [[afterProcessModel()]]，触发 [[EVENT_AFTER_PROCESS_MODEL]] 事件；
+     * 3. 调用 [[beforeProcessModel()]]，触发 [[EVENT_BEFORE_PROCESS_MODEL]] 事件，如果方法返回 `false`，则跳过后续的处理；
+     * 4. 调用 [[createModel()]]，创建模型；
+     * 5. 创建成功时调用 [[afterProcessModel()]]，触发 [[EVENT_AFTER_PROCESS_MODEL]] 事件；
      * 
      * @return \yii\db\ActiveRecordInterface 新创建的模型。
      * @throws \yii\web\ServerErrorHttpException 在创建模型时出现错误。
@@ -60,23 +61,38 @@ class CreateAction extends Action
         // 加载数据。
         $model = $this->loadModel($model, $params);
         
-        // 创建模型。
-        if ($this->createModel($model)) {
-            // 创建成功。
-            // 设置响应码。
-            $this->response->setStatusCode(201);
+        // 处理并且返回结果。
+        return $this->processModel($model);
+    }
+    
+    /**
+     * 处理模型。
+     * 
+     * @param \yii\db\BaseActiveRecord $model 需要创建的模型。
+     * @return \yii\db\BaseActiveRecord 处理后的模型。
+     */
+    protected function processModel($model)
+    {
+        // 调用创建模型前的方法和事件。
+        if ($this->beforeProcessModel($model)) {
+            // 创建模型。
+            if ($this->createModel($model)) {
+                // 创建成功。
+                // 设置响应码。
+                $this->response->setStatusCode(201);
             
-            // 设置响应头。
-            if ($this->viewAction !== false) {
-                $id = implode(',', array_values($model->getPrimaryKey(true)));
-                $this->response->getHeaders()->set('Location', Url::toRoute([$this->viewAction, 'id' => $id], true));
+                // 设置响应头。
+                if ($this->viewAction !== false) {
+                    $id = implode(',', array_values($model->getPrimaryKey(true)));
+                    $this->response->getHeaders()->set('Location', Url::toRoute([$this->viewAction, 'id' => $id], true));
+                }
+            
+                // 调用创建成功后的方法和事件。
+                $this->afterProcessModel($model);
             }
-            
-            // 调用创建成功后的方法和事件。
-            $this->afterProcessModel($model);
         }
-        
-        // 返回模型。
+
+        // 返回处理后的模型。
         return $model;
     }
     
@@ -93,8 +109,8 @@ class CreateAction extends Action
             return true;
         } elseif ($model->hasErrors()) {
             return false;
-        } else {
-            throw new ServerErrorHttpException('Failed to create the object for unknown reason.');
         }
+        
+        throw new ServerErrorHttpException('Failed to create the object for unknown reason.');
     }
 }
