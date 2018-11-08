@@ -42,7 +42,7 @@ class BatchViewAction extends BatchAction
         $ids = array_unique($ids);
         
         // 检查允许执行批量操作的个数。
-        $this->checkAllowCount($ids);
+        $this->checkAllowedCount($ids);
         
         // 准备模型列表。
         $models = $this->prepareModels($ids);

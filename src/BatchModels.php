@@ -28,7 +28,7 @@ class BatchModels extends \yii\base\BaseObject implements \IteratorAggregate, \A
     /**
      * 根据主键进行索引。
      * 
-     * @param string $separator 复合主键时的分隔符。
+     * @param string $separator 复合主键时使用的分隔符。
      */
     public function indexByPrimaryKey($separator = ',')
     {

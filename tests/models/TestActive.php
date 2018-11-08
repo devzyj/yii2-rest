@@ -33,7 +33,7 @@ class TestActive extends \yii\db\ActiveRecord
     {
         return [
             [['name', 'title'], 'safe'],
-            [['id'], 'integer'],
+            [['id'], 'integer', 'message' => 'id error.'],
         ];
     }
 }

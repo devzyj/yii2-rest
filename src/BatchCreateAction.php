@@ -51,7 +51,7 @@ class BatchCreateAction extends BatchAction
         }
 
         // 检查允许执行批量操作的个数。
-        $this->checkAllowCount($params);
+        $this->checkAllowedCount($params);
         
         // 批量处理结果。
         /* @var $result BatchResult */
@@ -102,6 +102,8 @@ class BatchCreateAction extends BatchAction
                 
                 return true;
             }
+        } elseif (!$model->hasErrors()) {
+            $model->addErrors(array_fill_keys($model::primaryKey(), 'Skipped create the object for unknown reason.'));
         }
         
         return false;

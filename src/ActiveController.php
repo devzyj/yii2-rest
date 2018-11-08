@@ -22,19 +22,14 @@ class ActiveController extends \yii\rest\ActiveController
     public $serializer = 'devzyj\rest\Serializer';
     
     /**
-     * @var string 查询数据的模型类名。如果没有设置，则使用 [[$modelClass]]。
-     */
-    public $searchModelClass;
-    
-    /**
-     * @var string 模型不存在时的异常信息。
+     * @var string 模型不存在时的错误信息。
      */
     public $notFoundMessage;
     
     /**
      * @var integer 允许批量执行的资源个数。
      */
-    public $allowCount;
+    public $allowedCount;
 
     /**
      * @var string 批量操作请求资源过多的错误信息。
@@ -44,24 +39,11 @@ class ActiveController extends \yii\rest\ActiveController
     /**
      * {@inheritdoc}
      */
-    public function init()
-    {
-        parent::init();
-    
-        if ($this->searchModelClass === null) {
-            $this->searchModelClass = $this->modelClass;
-        }
-    }
-    
-    /**
-     * {@inheritdoc}
-     */
     public function actions()
     {
         return ArrayHelper::merge(parent::actions(), [
             'index' => [
                 'class' => 'devzyj\rest\IndexAction',
-                'modelClass' => $this->searchModelClass,
             ],
             'view' => [
                 'class' => 'devzyj\rest\ViewAction',
@@ -101,7 +83,7 @@ class ActiveController extends \yii\rest\ActiveController
                 'checkAccess' => [$this, 'checkAccess'],
                 'checkModelAccess' => [$this, 'checkModelAccess'],
                 'notFoundMessage' => $this->notFoundMessage,
-                'allowCount' => $this->allowCount,
+                'allowedCount' => $this->allowedCount,
                 'manyResourcesMessage' => $this->manyResourcesMessage,
             ],
             'batch-create' => [
@@ -109,7 +91,7 @@ class ActiveController extends \yii\rest\ActiveController
                 'modelClass' => $this->modelClass,
                 'checkAccess' => [$this, 'checkAccess'],
                 'scenario' => $this->createScenario,
-                'allowCount' => $this->allowCount,
+                'allowedCount' => $this->allowedCount,
                 'manyResourcesMessage' => $this->manyResourcesMessage,
             ],
             'batch-update' => [
@@ -119,7 +101,7 @@ class ActiveController extends \yii\rest\ActiveController
                 'scenario' => $this->updateScenario,
                 'checkModelAccess' => [$this, 'checkModelAccess'],
                 'notFoundMessage' => $this->notFoundMessage,
-                'allowCount' => $this->allowCount,
+                'allowedCount' => $this->allowedCount,
                 'manyResourcesMessage' => $this->manyResourcesMessage,
             ],
             'batch-delete' => [
@@ -128,7 +110,7 @@ class ActiveController extends \yii\rest\ActiveController
                 'checkAccess' => [$this, 'checkAccess'],
                 'checkModelAccess' => [$this, 'checkModelAccess'],
                 'notFoundMessage' => $this->notFoundMessage,
-                'allowCount' => $this->allowCount,
+                'allowedCount' => $this->allowedCount,
                 'manyResourcesMessage' => $this->manyResourcesMessage,
             ],
         ]);

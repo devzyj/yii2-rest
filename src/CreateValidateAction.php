@@ -8,6 +8,7 @@ namespace devzyj\rest;
 
 use Yii;
 use yii\base\Model;
+use yii\web\ServerErrorHttpException;
 
 /**
  * CreateValidateAction 实现了从给定的数据创建新模型时，验证数据的 API 端点。
@@ -32,6 +33,7 @@ class CreateValidateAction extends Action
      * 4. 调用 [[validateModel()]]，验证模型；
      * 
      * @return \yii\db\ActiveRecordInterface|null 验证时有错误的模型。没有错误时返回 `null`。
+     * @throws \yii\web\ServerErrorHttpException 在 [[beforeProcessModel()]] 返回 `false` 时 `$model` 中没有指定错误内容。
      */
     public function run()
     {
@@ -61,6 +63,7 @@ class CreateValidateAction extends Action
      * 
      * @param \yii\db\BaseActiveRecord $model 需要验证的模型。
      * @return \yii\db\BaseActiveRecord|null 验证时有错误的模型。没有错误时返回 `null`。
+     * @throws \yii\web\ServerErrorHttpException 如果在 [[beforeProcessModel()]] 返回 `false` 时 `$model` 中没有指定错误内容。
      */
     protected function processModel($model)
     {
@@ -74,6 +77,8 @@ class CreateValidateAction extends Action
                 // 返回空结果。
                 return;
             }
+        } elseif (!$model->hasErrors()) {
+            throw new ServerErrorHttpException('Skipped validate the object for unknown reason.');
         }
 
         // 返回验证错误的模型。

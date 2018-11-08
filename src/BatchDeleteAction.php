@@ -46,7 +46,7 @@ class BatchDeleteAction extends BatchAction
         $ids = array_unique($ids);
 
         // 检查允许执行批量操作的个数。
-        $this->checkAllowCount($ids);
+        $this->checkAllowedCount($ids);
 
         // 准备模型列表。
         $models = $this->prepareModels($ids);
@@ -97,6 +97,8 @@ class BatchDeleteAction extends BatchAction
                 
                 return true;
             }
+        } elseif (!$model->hasErrors()) {
+            $model->addErrors(array_fill_keys($model::primaryKey(), 'Skipped delete the object for unknown reason.'));
         }
         
         return false;

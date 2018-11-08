@@ -75,7 +75,10 @@ class IndexAction extends Action
         // 构造过滤条件。
         $filter = null;
         if ($this->dataFilter) {
-            $this->dataFilter = Yii::createObject($this->dataFilter);
+            if (!$this->dataFilter instanceof \yii\data\DataFilter) {
+                $this->dataFilter = Yii::createObject($this->dataFilter);
+            }
+            
             if ($this->dataFilter->load($params)) {
                 $filter = $this->dataFilter->build();
                 if ($filter === false) {

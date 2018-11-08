@@ -38,7 +38,7 @@ class UpdateAction extends Action
      * 
      * @param string $id 模型的主键。
      * @return \yii\db\ActiveRecordInterface 正在更新的模型。
-     * @throws \yii\web\ServerErrorHttpException 更新模型时有错误。
+     * @throws \yii\web\ServerErrorHttpException 更新模型时有错误，或者在 [[beforeProcessModel()]] 返回 `false` 时 `$model` 中没有指定错误内容。
      */
     public function run($id)
     {
@@ -73,6 +73,7 @@ class UpdateAction extends Action
      * 
      * @param \yii\db\BaseActiveRecord $model 需要更新的模型。
      * @return \yii\db\BaseActiveRecord 处理后的模型。
+     * @throws \yii\web\ServerErrorHttpException 如果在 [[beforeProcessModel()]] 返回 `false` 时 `$model` 中没有指定错误内容。
      */
     protected function processModel($model)
     {
@@ -83,6 +84,8 @@ class UpdateAction extends Action
                 // 调用更新成功后的方法和事件。
                 $this->afterProcessModel($model);
             }
+        } elseif (!$model->hasErrors()) {
+            throw new ServerErrorHttpException('Skipped update the object for unknown reason.');
         }
         
         // 返回处理后的模型。

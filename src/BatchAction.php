@@ -28,10 +28,11 @@ class BatchAction extends Action
     /**
      * @var integer 允许批量执行的资源个数。
      */
-    public $allowCount;
+    public $allowedCount;
 
     /**
      * @var string 批量操作请求资源过多的错误信息。
+     * 支持变量 `{allowedCount}` 和 `{requestedCount}`。
      */
     public $manyResourcesMessage;
 
@@ -55,7 +56,7 @@ class BatchAction extends Action
     public function init()
     {
         if ($this->manyResourcesMessage === null) {
-            $this->manyResourcesMessage = 'Request too many resources.';
+            $this->manyResourcesMessage = 'The number of resources requested cannot exceed `{allowedCount}`.';
         }
     
         parent::init();
@@ -65,12 +66,16 @@ class BatchAction extends Action
      * 检查允许批量执行的资源个数。
      *
      * @param array $data 请求的资源数组。
-     * @throws \yii\web\HttpException 如果设置了 [[$allowCount]] 并且超出设置的数量。
+     * @throws \yii\web\HttpException 如果设置了 [[$allowedCount]] 并且超出设置的数量。
      */
-    public function checkAllowCount($data)
+    public function checkAllowedCount($data)
     {
-        if ($this->allowCount !== null && count($data) > $this->allowCount) {
-            throw new HttpException(413, $this->manyResourcesMessage);
+        $requestedCount = count($data);
+        if ($this->allowedCount !== null && $requestedCount > $this->allowedCount) {
+            throw new HttpException(413, strtr($this->manyResourcesMessage, [
+                '{allowedCount}' => $this->allowedCount,
+                '{requestedCount}' => $requestedCount,
+            ]));
         }
     }
     

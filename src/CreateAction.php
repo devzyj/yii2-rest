@@ -40,7 +40,7 @@ class CreateAction extends Action
      * 5. 创建成功时调用 [[afterProcessModel()]]，触发 [[EVENT_AFTER_PROCESS_MODEL]] 事件；
      * 
      * @return \yii\db\ActiveRecordInterface 新创建的模型。
-     * @throws \yii\web\ServerErrorHttpException 在创建模型时出现错误。
+     * @throws \yii\web\ServerErrorHttpException 在创建模型时出现错误，或者在 [[beforeProcessModel()]] 返回 `false` 时 `$model` 中没有指定错误内容。
      */
     public function run()
     {
@@ -70,6 +70,7 @@ class CreateAction extends Action
      * 
      * @param \yii\db\BaseActiveRecord $model 需要创建的模型。
      * @return \yii\db\BaseActiveRecord 处理后的模型。
+     * @throws \yii\web\ServerErrorHttpException 如果在 [[beforeProcessModel()]] 返回 `false` 时 `$model` 中没有指定错误内容。
      */
     protected function processModel($model)
     {
@@ -90,6 +91,8 @@ class CreateAction extends Action
                 // 调用创建成功后的方法和事件。
                 $this->afterProcessModel($model);
             }
+        } elseif (!$model->hasErrors()) {
+            throw new ServerErrorHttpException('Skipped create the object for unknown reason.');
         }
 
         // 返回处理后的模型。

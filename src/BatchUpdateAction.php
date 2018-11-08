@@ -54,7 +54,7 @@ class BatchUpdateAction extends BatchAction
         }
 
         // 检查允许执行批量操作的个数。
-        $this->checkAllowCount($params);
+        $this->checkAllowedCount($params);
 
         // 获取模型的主键值列表。
         $ids = array_keys($params);
@@ -114,6 +114,8 @@ class BatchUpdateAction extends BatchAction
                 
                 return true;
             }
+        } elseif (!$model->hasErrors()) {
+            $model->addErrors(array_fill_keys($model::primaryKey(), 'Skipped update the object for unknown reason.'));
         }
 
         return false;
@@ -124,7 +126,6 @@ class BatchUpdateAction extends BatchAction
      * 
      * @param \yii\db\BaseActiveRecord $model 需要更新的模型。
      * @return boolean 更新是否成功。
-     * @throws \yii\web\ServerErrorHttpException 更新模型时有错误。
      */
     protected function updateModel($model)
     {

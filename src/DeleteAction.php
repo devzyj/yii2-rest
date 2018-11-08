@@ -30,7 +30,7 @@ class DeleteAction extends Action
      * 7. 删除成功时调用 [[afterProcessModel()]]，触发 [[EVENT_AFTER_PROCESS_MODEL]] 事件；
      * 
      * @param string $id 模型的主键。
-     * @throws \yii\web\ServerErrorHttpException 删除模型时有错误。
+     * @throws \yii\web\ServerErrorHttpException 删除模型时有错误，或者在 [[beforeProcessModel()]] 返回 `false` 时 `$model` 中没有指定错误内容。
      */
     public function run($id)
     {
@@ -55,6 +55,7 @@ class DeleteAction extends Action
      * 处理模型。
      * 
      * @param \yii\db\BaseActiveRecord $model 需要删除的模型。
+     * @throws \yii\web\ServerErrorHttpException 如果在 [[beforeProcessModel()]] 返回 `false` 时 `$model` 中没有指定错误内容。
      */
     protected function processModel($model)
     {
@@ -68,6 +69,8 @@ class DeleteAction extends Action
     
             // 调用删除成功后的方法和事件。
             $this->afterProcessModel($model);
+        } elseif (!$model->hasErrors()) {
+            throw new ServerErrorHttpException('Skipped delete the object for unknown reason.');
         }
     }
     

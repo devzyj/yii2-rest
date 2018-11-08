@@ -29,7 +29,7 @@ class Action extends \yii\rest\Action
 
     /**
      * @event ActionEvent 在处理模型前触发的事件。
-     * 设置 [[ActionEvent::isValid]] 为 `false`，可以停止之后的处理。
+     * 设置 [[ActionEvent::$isValid]] 为 `false`，可以停止之后的处理。
      */
     const EVENT_BEFORE_PROCESS_MODEL = 'beforeProcessModel';
     
@@ -71,7 +71,7 @@ class Action extends \yii\rest\Action
     public $checkModelAccess;
     
     /**
-     * @var string 模型不存在时的错误信息，支持变量 `{id}`。
+     * @var string 模型不存在时的错误信息。支持变量 `{id}`。
      * @see findModel()
      */
     public $notFoundMessage;
@@ -92,7 +92,7 @@ class Action extends \yii\rest\Action
     public function init()
     {
         if ($this->notFoundMessage === null) {
-            $this->notFoundMessage = 'Object not found: {id}';
+            $this->notFoundMessage = 'Object not found: `{id}`';
         }
 
         if ($this->request === null) {
@@ -220,6 +220,8 @@ class Action extends \yii\rest\Action
     /**
      * 在处理模型前调用此方法。
      * 默认实现了触发 [[EVENT_BEFORE_PROCESS_MODEL]] 事件。
+     * 
+     * 在事件中设置 [[ActionEvent::$isValid]] 为 `false`，可以停止之后的处理。
      *
      * @param object $object 对像实例。
      * @return boolean 动作是否有效。
