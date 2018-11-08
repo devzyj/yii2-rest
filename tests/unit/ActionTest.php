@@ -244,6 +244,9 @@ class ActionTest extends TestCase
         $models = $action->run('1;3;4;999;9999');
         $this->tester->assertInstanceOf(BatchResult::className(), $models);
         $this->tester->assertCount(3, $models);
+        $this->tester->assertArrayHasKey('1', $models);
+        $this->tester->assertArrayHasKey('3', $models);
+        $this->tester->assertArrayHasKey('4', $models);
     }
     
     /**
@@ -258,13 +261,16 @@ class ActionTest extends TestCase
         ]);
 
         $this->request->setBodyParams([
-            ['id' => 10, 'name' => 'TestName10', 'title' => 'TestTitle10'],
-            ['id' => 11, 'name' => 'TestName11', 'title' => 'TestTitle11'],
-            ['id' => 'AA', 'name' => 'TestNameAA', 'title' => 'TestTitleAA'],
+            'key1' => ['id' => 10, 'name' => 'TestName10', 'title' => 'TestTitle10'],
+            'key2' => ['id' => 11, 'name' => 'TestName11', 'title' => 'TestTitle11'],
+            'key3' => ['id' => 'AA', 'name' => 'TestNameAA', 'title' => 'TestTitleAA'],
         ]);
         $models = $action->run();
         $this->tester->assertInstanceOf(BatchResult::className(), $models);
         $this->tester->assertCount(3, $models);
+        $this->tester->assertArrayHasKey('key1', $models);
+        $this->tester->assertArrayHasKey('key2', $models);
+        $this->tester->assertArrayHasKey('key3', $models);
         $this->tester->seeRecord(TestActive::className(), [
             'id' => 10, 
             'name' => 'TestName10',
@@ -302,6 +308,9 @@ class ActionTest extends TestCase
         $models = $action->run();
         $this->tester->assertInstanceOf(BatchResult::className(), $models);
         $this->tester->assertCount(3, $models);
+        $this->tester->assertArrayHasKey('1', $models);
+        $this->tester->assertArrayHasKey('3', $models);
+        $this->tester->assertArrayHasKey('4', $models);
         $this->tester->seeRecord(TestActive::className(), [
             'id' => 1, 
             'name' => 'TestName11',
@@ -333,6 +342,9 @@ class ActionTest extends TestCase
         $models = $action->run('1;3;4;999;9999');
         $this->tester->assertInstanceOf(BatchResult::className(), $models);
         $this->tester->assertCount(3, $models);
+        $this->tester->assertArrayHasKey('1', $models);
+        $this->tester->assertArrayHasKey('3', $models);
+        $this->tester->assertArrayHasKey('4', $models);
         $this->tester->dontSeeRecord(TestActive::className(), [
             'id' => 1
         ]);

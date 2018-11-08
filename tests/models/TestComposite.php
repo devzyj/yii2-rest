@@ -7,23 +7,24 @@
 namespace devzyj\rest\tests\models;
 
 /**
- * TestActive class.
+ * TestComposite class.
  * 
- * @property string $id ID
+ * @property string $id1 ID1
+ * @property string $id2 ID2
  * @property string $name Name
  * @property string $title Title
  * 
  * @author ZhangYanJiong <zhangyanjiong@163.com>
  * @since 1.0
  */
-class TestActive extends \yii\db\ActiveRecord
+class TestComposite extends \yii\db\ActiveRecord
 {
     /**
      * {@inheritdoc}
      */
     public static function tableName()
     {
-        return 'devzyj_test_active';
+        return 'devzyj_test_active_composite';
     }
 
     /**
@@ -33,17 +34,7 @@ class TestActive extends \yii\db\ActiveRecord
     {
         return [
             [['name', 'title'], 'safe'],
-            [['id'], 'integer', 'message' => 'id error.'],
+            [['id1', 'id2'], 'integer', 'message' => '{attribute} error.'],
         ];
-    }
-    
-    /**
-     * @return \yii\db\ActiveQuery
-     */
-    public function getUser()
-    {
-        $query = new \yii\db\ActiveQuery($this::className());
-        $query->multiple = false;
-        return $query;
     }
 }
