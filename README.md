@@ -7,6 +7,22 @@ REST Extension for Yii2
 Installation
 ------------
 
+The preferred way to install this extension is through [composer](http://getcomposer.org/download/).
+
+Either run
+
+```bash
+composer require --prefer-dist "devzyj/yii2-rest" "~1.0.0"
+```
+
+or add
+
+```json
+"devzyj/yii2-rest" : "~1.0.0"
+```
+
+to the require section of your application's `composer.json` file.
+
 
 Usage
 -----
@@ -137,6 +153,17 @@ Events
 - `beforeProcessModel` 在处理模型前触发的事件。
 - `afterProcessModel` 在处理完模型后触发的事件。
 - `afterProcessModels` 在处理完模型列表后触发的事件。
+
+事件参数说明：
+
+- 事件参数的类型为 `ActionEvent`。
+- `ActionEvent::$object` 执行事件时的数据对像，以下列出的是对应事件中的对像类型。
+    - `afterPrepareDataProvider`：`\yii\data\ActiveDataProvider`
+    - `afterPrepareModel`： `\yii\db\ActiveRecord`
+    - `afterLoadModel`： `\yii\db\ActiveRecord`
+    - `beforeProcessModel`： `\yii\db\ActiveRecord`
+    - `afterProcessModel`： `\yii\db\ActiveRecord`
+    - `afterProcessModels`： `\devzyj\rest\BatchResult`
 
 
 Behaviors
