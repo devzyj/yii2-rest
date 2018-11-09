@@ -26,20 +26,23 @@ class BatchCreateAction extends BatchAction
      * 创建多个新模型。
      * 
      * 该方法依次执行以下步骤：
-     * 1. 当设置了 [[$checkAccess]] 时，调用该回调方法检查动作权限；
-     * 2. 循环中调用 [[afterLoadModel()]]，触发 [[EVENT_AFTER_LOAD_MODEL]] 事件；
-     * 3. 循环中调用 [[beforeProcessModel()]]，触发 [[EVENT_BEFORE_PROCESS_MODEL]] 事件，如果方法返回 `false`，则跳过后续的处理；
-     * 4. 循环中调用 [[createModel()]]，创建模型；
-     * 5. 循环中创建成功时调用 [[afterProcessModel()]]，触发 [[EVENT_AFTER_PROCESS_MODEL]] 事件；
-     * 6. 调用 [[afterProcessModels()]]，触发 [[EVENT_AFTER_PROCESS_MODELS]] 事件；
+     * 1. 当设置了 [[$checkActionAccess]] 时，调用该回调方法检查动作权限；
+     * 2. 调用 [[beforeLoadModel()]]，触发 [[EVENT_BEFORE_LOAD_MODEL]] 事件，如果方法返回 `false`，则阻止模型加载数据；
+     * 3. 加载数据成功后调用 [[afterLoadModel()]]，触发 [[EVENT_AFTER_LOAD_MODEL]] 事件；
+     * 4. 调用 [[beforeProcessModel()]]，触发 [[EVENT_BEFORE_PROCESS_MODEL]] 事件，如果方法返回 `false`，则阻止创建模型；
+     * 5. 调用 [[createModel()]]，创建模型；
+     * 6. 创建成功时调用 [[afterProcessModel()]]，触发 [[EVENT_AFTER_PROCESS_MODEL]] 事件；
+     * 7. 调用 [[afterProcessModels()]]，触发 [[EVENT_AFTER_PROCESS_MODELS]] 事件；
+     * 
+     * 注意：执行步骤 2 到 6 会被多次调用。
      * 
      * @return BatchResult 批量处理的结果集。
      */
     public function run()
     {
         // 检查动作权限。
-        if ($this->checkAccess) {
-            call_user_func($this->checkAccess, $this);
+        if ($this->checkActionAccess) {
+            call_user_func($this->checkActionAccess, $this);
         }
 
         // 获取请求参数。
@@ -66,7 +69,7 @@ class BatchCreateAction extends BatchAction
             $model->setScenario($this->scenario);
             
             // 加载数据。
-            $model = $this->loadModel($model, $data);
+            $this->loadModel($model, $data);
 
             // 处理模型。
             if ($this->processModel($model)) {

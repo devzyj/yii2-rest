@@ -26,23 +26,26 @@ class BatchUpdateAction extends BatchAction
      * 更新多个现有模型。
      * 
      * 该方法依次执行以下步骤：
-     * 1. 当设置了 [[$checkAccess]] 时，调用该回调方法检查动作权限；
+     * 1. 当设置了 [[$checkActionAccess]] 时，调用该回调方法检查动作权限；
      * 2. 调用 [[findModels()]]，查找数据模型列表；
-     * 3. 循环中调用 [[afterPrepareModel()]]，触发 [[EVENT_AFTER_PREPARE_MODEL]] 事件；
-     * 4. 当设置了 [[$checkModelAccess]] 时，调用该回调方法检查模型权限，并且过滤掉没有权限的模型；
-     * 5. 循环中调用 [[afterLoadModel()]]，触发 [[EVENT_AFTER_LOAD_MODEL]] 事件；
-     * 6. 循环中调用 [[beforeProcessModel()]]，触发 [[EVENT_BEFORE_PROCESS_MODEL]] 事件，如果方法返回 `false`，则跳过后续的处理；
-     * 7. 循环中调用 [[updateModel()]]，更新模型；
-     * 8. 循环中更新成功时调用 [[afterProcessModel()]]，触发 [[EVENT_AFTER_PROCESS_MODEL]] 事件；
-     * 9. 调用 [[afterProcessModels()]]，触发 [[EVENT_AFTER_PROCESS_MODELS]] 事件；
+     * 3. 调用 [[afterPrepareModel()]]，触发 [[EVENT_AFTER_PREPARE_MODEL]] 事件；
+     * 4. 当设置了 [[$checkModelAccess]] 时，调用该回调方法检查模型权限；
+     * 5. 调用 [[beforeLoadModel()]]，触发 [[EVENT_BEFORE_LOAD_MODEL]] 事件，如果方法返回 `false`，则阻止模型加载数据；
+     * 6. 加载数据成功后调用 [[afterLoadModel()]]，触发 [[EVENT_AFTER_LOAD_MODEL]] 事件；
+     * 7. 调用 [[beforeProcessModel()]]，触发 [[EVENT_BEFORE_PROCESS_MODEL]] 事件，如果方法返回 `false`，则阻止更新模型；
+     * 8. 调用 [[updateModel()]]，更新模型；
+     * 9. 更新成功时调用 [[afterProcessModel()]]，触发 [[EVENT_AFTER_PROCESS_MODEL]] 事件；
+     * 10. 调用 [[afterProcessModels()]]，触发 [[EVENT_AFTER_PROCESS_MODELS]] 事件；
+     * 
+     * 注意：执行步骤 3 以及步骤 5 到 9 会被多次调用。
      * 
      * @return BatchResult 批量处理的结果集。
      */
     public function run()
     {
         // 检查动作权限。
-        if ($this->checkAccess) {
-            call_user_func($this->checkAccess, $this);
+        if ($this->checkActionAccess) {
+            call_user_func($this->checkActionAccess, $this);
         }
 
         // 获取请求参数。
@@ -78,7 +81,7 @@ class BatchUpdateAction extends BatchAction
             $model->setScenario($this->scenario);
             
             // 加载数据。
-            $model = $this->loadModel($model, $params[$key]);
+            $this->loadModel($model, $params[$key]);
             
             // 处理模型。
             if ($this->processModel($model)) {

@@ -20,7 +20,7 @@ class BatchDeleteAction extends BatchAction
      * 删除多个模型。
      * 
      * 该方法依次执行以下步骤：
-     * 1. 当设置了 [[$checkAccess]] 时，调用该回调方法检查动作权限；
+     * 1. 当设置了 [[$checkActionAccess]] 时，调用该回调方法检查动作权限；
      * 2. 调用 [[findModels()]]，查找数据模型列表；
      * 3. 循环中调用 [[afterPrepareModel()]]，触发 [[EVENT_AFTER_PREPARE_MODEL]] 事件；
      * 4. 当设置了 [[$checkModelAccess]] 时，调用该回调方法检查模型权限，并且过滤掉没有权限的模型；
@@ -35,8 +35,8 @@ class BatchDeleteAction extends BatchAction
     public function run($ids)
     {
         // 检查动作权限。
-        if ($this->checkAccess) {
-            call_user_func($this->checkAccess, $this);
+        if ($this->checkActionAccess) {
+            call_user_func($this->checkActionAccess, $this);
         }
 
         // 转换请求中的字符串IDs为数组。

@@ -20,6 +20,11 @@ class ActiveController extends \yii\rest\ActiveController
      * {@inheritdoc}
      */
     public $serializer = 'devzyj\rest\Serializer';
+
+    /**
+     * @var string 查询数据的模型类名。如果为不设置，则使用 [[$modelClass]]。
+     */
+    public $searchModelClass;
     
     /**
      * @var string 模型不存在时的错误信息。
@@ -39,11 +44,26 @@ class ActiveController extends \yii\rest\ActiveController
     /**
      * {@inheritdoc}
      */
+    public function init()
+    {
+        // 执行父类程序。
+        parent::init();
+        
+        // 查询数据的模型类名。
+        if ($this->searchModelClass === null) {
+            $this->searchModelClass = $this->modelClass;
+        }
+    }
+    
+    /**
+     * {@inheritdoc}
+     */
     public function actions()
     {
         return ArrayHelper::merge(parent::actions(), [
             'index' => [
                 'class' => 'devzyj\rest\IndexAction',
+                'modelClass' => $this->searchModelClass,
             ],
             'view' => [
                 'class' => 'devzyj\rest\ViewAction',
@@ -66,13 +86,13 @@ class ActiveController extends \yii\rest\ActiveController
             'create-validate' => [
                 'class' => 'devzyj\rest\CreateValidateAction',
                 'modelClass' => $this->modelClass,
-                'checkAccess' => [$this, 'checkAccess'],
+                'checkActionAccess' => [$this, 'checkActionAccess'],
                 'scenario' => $this->createScenario,
             ],
             'update-validate' => [
                 'class' => 'devzyj\rest\UpdateValidateAction',
                 'modelClass' => $this->modelClass,
-                'checkAccess' => [$this, 'checkAccess'],
+                'checkActionAccess' => [$this, 'checkActionAccess'],
                 'scenario' => $this->updateScenario,
                 'checkModelAccess' => [$this, 'checkModelAccess'],
                 'notFoundMessage' => $this->notFoundMessage,
@@ -80,7 +100,7 @@ class ActiveController extends \yii\rest\ActiveController
             'batch-view' => [
                 'class' => 'devzyj\rest\BatchViewAction',
                 'modelClass' => $this->modelClass,
-                'checkAccess' => [$this, 'checkAccess'],
+                'checkActionAccess' => [$this, 'checkActionAccess'],
                 'checkModelAccess' => [$this, 'checkModelAccess'],
                 'notFoundMessage' => $this->notFoundMessage,
                 'allowedCount' => $this->allowedCount,
@@ -89,7 +109,7 @@ class ActiveController extends \yii\rest\ActiveController
             'batch-create' => [
                 'class' => 'devzyj\rest\BatchCreateAction',
                 'modelClass' => $this->modelClass,
-                'checkAccess' => [$this, 'checkAccess'],
+                'checkActionAccess' => [$this, 'checkActionAccess'],
                 'scenario' => $this->createScenario,
                 'allowedCount' => $this->allowedCount,
                 'manyResourcesMessage' => $this->manyResourcesMessage,
@@ -97,7 +117,7 @@ class ActiveController extends \yii\rest\ActiveController
             'batch-update' => [
                 'class' => 'devzyj\rest\BatchUpdateAction',
                 'modelClass' => $this->modelClass,
-                'checkAccess' => [$this, 'checkAccess'],
+                'checkActionAccess' => [$this, 'checkActionAccess'],
                 'scenario' => $this->updateScenario,
                 'checkModelAccess' => [$this, 'checkModelAccess'],
                 'notFoundMessage' => $this->notFoundMessage,
@@ -107,7 +127,7 @@ class ActiveController extends \yii\rest\ActiveController
             'batch-delete' => [
                 'class' => 'devzyj\rest\BatchDeleteAction',
                 'modelClass' => $this->modelClass,
-                'checkAccess' => [$this, 'checkAccess'],
+                'checkActionAccess' => [$this, 'checkActionAccess'],
                 'checkModelAccess' => [$this, 'checkModelAccess'],
                 'notFoundMessage' => $this->notFoundMessage,
                 'allowedCount' => $this->allowedCount,
@@ -130,6 +150,16 @@ class ActiveController extends \yii\rest\ActiveController
             'bartch-delete' => ['DELETE'],
         ]);
     }
+
+    /**
+     * {@inheritdoc}
+     * 
+     * @deprecated 使用 [[checkActionAccess()]] 和 [[checkModelAccess()]] 检查权限。
+     */
+    public function checkAccess($action, $model = null, $params = [])
+    {
+        parent::checkAccess($action, $model, $params);
+    }
     
     /**
      * 检查用户是否有执行当前动作的权限。
@@ -141,7 +171,7 @@ class ActiveController extends \yii\rest\ActiveController
      * @param array $params 附加参数。
      * @throws \yii\web\ForbiddenHttpException 没有访问权限。
      */
-    public function checkAccess($action, $params = [])
+    public function checkActionAccess($action, $params = [])
     {}
     
     /**

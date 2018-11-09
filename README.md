@@ -1,7 +1,9 @@
 REST Extension for Yii2
 =======================
 
-对 `yiisoft/yii2-rest` 进行了增强。在 `Action` 中增加了事件。增加了对多个资源进行操作的 `Action`。
+增强 [yiisoft/yii2-rest](https://github.com/yiisoft/yii-rest) 功能，在 `Actions` 中增加事件。
+
+并且增加了批量操作的 `Actions`。
 
 
 Installation
@@ -32,6 +34,7 @@ Usage
 class UserController extends \devzyj\rest\ActiveController
 {
     public $modelClass = 'app\models\User';
+    //public $searchModelClass` = 'app\models\UserSearch';
     //public $notFoundMessage = 'User not found: `{id}`';
     //public $allowedCount = 100;
     //public $manyResourcesMessage = 'The number of users requested cannot exceed `{allowedCount}`.';
@@ -46,6 +49,7 @@ return [
                 [
                     'class' => 'devzyj\rest\UrlRule',
                     'controller' => 'user',
+                    //'extraTokens' => ['{account}' => '<account:\\w[\\w]*>'],
                 ]
             ]
         ],
@@ -85,11 +89,19 @@ Controllers
 -----------
 
 - ActiveController
-    - 增加 `$notFoundMessage`，模型不存在时的错误信息。
-    - 增加 `$allowedCount`，允许批量执行的资源个数。
-    - 增加 `$manyResourcesMessage`，批量操作请求资源过多的错误信息。
-    - 修改 `checkAccess($action, $params = [])`，检查用户是否有执行当前动作的权限。
-    - 增加 `checkModelAccess($model, $action, $params = [])`，检查用户是否有执行数据模型的权限。
+    - 增加 `$searchModelClass` 查询数据的模型类名，如果不设置，则使用 [[$modelClass]]
+    - 增加 `$notFoundMessage` 模型不存在时的错误信息
+    - 增加 `$allowedCount` 允许批量执行的资源个数
+    - 增加 `$manyResourcesMessage` 批量操作请求资源过多的错误信息
+    - 增加 `checkActionAccess($action, $params = [])` 检查用户是否有执行当前动作的权限
+    - 增加 `checkModelAccess($model, $action, $params = [])` 检查用户是否有执行数据模型的权限
+    - 废弃 `checkAccess()`
+
+
+UrlRule
+-------
+
+- 增加 `$extraTokens` 额外的令牌列表。
 
 
 Actions
@@ -102,11 +114,13 @@ Actions
 - ViewAction
     - 增加 `afterPrepareModel` 事件。
 - CreateAction
+    - 增加 `beforeLoadModel` 事件。
     - 增加 `afterLoadModel` 事件。
     - 增加 `beforeProcessModel` 事件。
     - 增加 `afterProcessModel` 事件。
 - UpdateAction
     - 增加 `afterPrepareModel` 事件。
+    - 增加 `beforeLoadModel` 事件。
     - 增加 `afterLoadModel` 事件。
     - 增加 `beforeProcessModel` 事件。
     - 增加 `afterProcessModel` 事件。
@@ -118,21 +132,25 @@ Actions
 增加的 Actions：
 
 - CreateValidateAction 创建新模型时，验证数据。
+    - `beforeLoadModel`
     - `afterLoadModel`
     - `beforeProcessModel`
 - UpdateValidateAction 更新模型时，验证数据。
     - `afterPrepareModel`
+    - `beforeLoadModel`
     - `afterLoadModel`
     - `beforeProcessModel`
 - BatchViewAction 显示多个模型。
     - `afterPrepareModel`
 - BatchCreateAction 创建多个新模型。
+    - `beforeLoadModel`
     - `afterLoadModel`
     - `beforeProcessModel`
     - `afterProcessModel`
     - `afterProcessModels`
 - BatchUpdateAction 更新多个模型。
     - `afterPrepareModel`
+    - `beforeLoadModel`
     - `afterLoadModel`
     - `beforeProcessModel`
     - `afterProcessModel`
@@ -143,16 +161,24 @@ Actions
     - `afterProcessModel`
     - `afterProcessModels`
 
-
 Events
 ------
 
 - `afterPrepareDataProvider` 在准备完数据源后触发的事件。
 - `afterPrepareModel` 在准备完模型后触发的事件。
-- `afterLoadModel` 在模型加载完数据后触发的事件。
-- `beforeProcessModel` 在处理模型前触发的事件。
-- `afterProcessModel` 在处理完模型后触发的事件。
+- `beforeLoadModel` 在模型加载数据前触发的事件，如果返回 `false`，则阻止模型加载数据。
+- `afterLoadModel` 在模型成功加载完数据后触发的事件。
+- `beforeProcessModel` 在处理模型前触发的事件，如果返回 `false`，则阻止处理模型。
+- `afterProcessModel` 在成功处理完模型后触发的事件。
 - `afterProcessModels` 在处理完模型列表后触发的事件。
+
+在批量动作中会多次调用的事件：
+
+- `afterPrepareModel`
+- `beforeLoadModel`
+- `afterLoadModel`
+- `beforeProcessModel`
+- `afterProcessModel`
 
 事件参数说明：
 
@@ -160,6 +186,7 @@ Events
 - `ActionEvent::$object` 执行事件时的数据对像，以下列出的是对应事件中的对像类型。
     - `afterPrepareDataProvider`：`\yii\data\ActiveDataProvider`
     - `afterPrepareModel`： `\yii\db\ActiveRecord`
+    - `beforeLoadModel`： `Array`
     - `afterLoadModel`： `\yii\db\ActiveRecord`
     - `beforeProcessModel`： `\yii\db\ActiveRecord`
     - `afterProcessModel`： `\yii\db\ActiveRecord`
@@ -169,4 +196,4 @@ Events
 Behaviors
 ---------
 
-- `EagerLoadingBehavior` 附加到 `IndexAction` 时，即时加载指定的额外资源，防止多次查询。
+- `EagerLoadingBehavior` 需要手动附加到 `IndexAction`，可以即时加载指定的额外资源，防止多次查询。

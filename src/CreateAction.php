@@ -33,11 +33,12 @@ class CreateAction extends Action
      * 创建一个新模型。
      * 
      * 该方法依次执行以下步骤：
-     * 1. 当设置了 [[$checkAccess]] 时，调用该回调方法检查动作权限；
-     * 2. 调用 [[afterLoadModel()]]，触发 [[EVENT_AFTER_LOAD_MODEL]] 事件；
-     * 3. 调用 [[beforeProcessModel()]]，触发 [[EVENT_BEFORE_PROCESS_MODEL]] 事件，如果方法返回 `false`，则跳过后续的处理；
-     * 4. 调用 [[createModel()]]，创建模型；
-     * 5. 创建成功时调用 [[afterProcessModel()]]，触发 [[EVENT_AFTER_PROCESS_MODEL]] 事件；
+     * 1. 当设置了 [[$checkActionAccess]] 时，调用该回调方法检查动作权限；
+     * 2. 调用 [[beforeLoadModel()]]，触发 [[EVENT_BEFORE_LOAD_MODEL]] 事件，如果方法返回 `false`，则阻止模型加载数据；
+     * 3. 加载数据成功后调用 [[afterLoadModel()]]，触发 [[EVENT_AFTER_LOAD_MODEL]] 事件；
+     * 4. 调用 [[beforeProcessModel()]]，触发 [[EVENT_BEFORE_PROCESS_MODEL]] 事件，如果方法返回 `false`，则阻止创建模型；
+     * 5. 调用 [[createModel()]]，创建模型；
+     * 6. 创建成功时调用 [[afterProcessModel()]]，触发 [[EVENT_AFTER_PROCESS_MODEL]] 事件；
      * 
      * @return \yii\db\ActiveRecordInterface 新创建的模型。
      * @throws \yii\web\ServerErrorHttpException 在创建模型时出现错误，或者在 [[beforeProcessModel()]] 返回 `false` 时 `$model` 中没有指定错误内容。
@@ -45,8 +46,8 @@ class CreateAction extends Action
     public function run()
     {
         // 检查动作权限。
-        if ($this->checkAccess) {
-            call_user_func($this->checkAccess, $this);
+        if ($this->checkActionAccess) {
+            call_user_func($this->checkActionAccess, $this);
         }
         
         /* @var $model \yii\db\BaseActiveRecord */
@@ -59,7 +60,7 @@ class CreateAction extends Action
         $model->setScenario($this->scenario);
         
         // 加载数据。
-        $model = $this->loadModel($model, $params);
+        $this->loadModel($model, $params);
         
         // 处理并且返回结果。
         return $this->processModel($model);

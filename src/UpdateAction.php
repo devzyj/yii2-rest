@@ -27,14 +27,15 @@ class UpdateAction extends Action
      * 更新现有模型。
      * 
      * 该方法依次执行以下步骤：
-     * 1. 当设置了 [[$checkAccess]] 时，调用该回调方法检查动作权限；
+     * 1. 当设置了 [[$checkActionAccess]] 时，调用该回调方法检查动作权限；
      * 2. 调用 [[findModel()]]，查找数据模型；
      * 3. 调用 [[afterPrepareModel()]]，触发 [[EVENT_AFTER_PREPARE_MODEL]] 事件；
      * 4. 当设置了 [[$checkModelAccess]] 时，调用该回调方法检查模型权限；
-     * 5. 调用 [[afterLoadModel()]]，触发 [[EVENT_AFTER_LOAD_MODEL]] 事件；
-     * 6. 调用 [[beforeProcessModel()]]，触发 [[EVENT_BEFORE_PROCESS_MODEL]] 事件，如果方法返回 `false`，则跳过后续的处理；
-     * 7. 调用 [[updateModel()]]，更新模型；
-     * 8. 更新成功时调用 [[afterProcessModel()]]，触发 [[EVENT_AFTER_PROCESS_MODEL]] 事件；
+     * 5. 调用 [[beforeLoadModel()]]，触发 [[EVENT_BEFORE_LOAD_MODEL]] 事件，如果方法返回 `false`，则阻止模型加载数据；
+     * 6. 加载数据成功后调用 [[afterLoadModel()]]，触发 [[EVENT_AFTER_LOAD_MODEL]] 事件；
+     * 7. 调用 [[beforeProcessModel()]]，触发 [[EVENT_BEFORE_PROCESS_MODEL]] 事件，如果方法返回 `false`，则阻止更新模型；
+     * 8. 调用 [[updateModel()]]，更新模型；
+     * 9. 更新成功时调用 [[afterProcessModel()]]，触发 [[EVENT_AFTER_PROCESS_MODEL]] 事件；
      * 
      * @param string $id 模型的主键。
      * @return \yii\db\ActiveRecordInterface 正在更新的模型。
@@ -43,8 +44,8 @@ class UpdateAction extends Action
     public function run($id)
     {
         // 检查动作权限。
-        if ($this->checkAccess) {
-            call_user_func($this->checkAccess, $this);
+        if ($this->checkActionAccess) {
+            call_user_func($this->checkActionAccess, $this);
         }
 
         // 准备模型。
@@ -62,7 +63,7 @@ class UpdateAction extends Action
         $model->setScenario($this->scenario);
         
         // 加载数据。
-        $model = $this->loadModel($model, $params);
+        $this->loadModel($model, $params);
         
         // 处理并且返回结果。
         return $this->processModel($model);

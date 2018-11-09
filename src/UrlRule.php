@@ -44,4 +44,21 @@ class UrlRule extends \yii\rest\UrlRule
         '{id}' => 'options',
         '' => 'options',
     ];
+    
+    /**
+     * @var array 额外的令牌列表。键是令牌名称，值是相应的替换。额外的令牌将优先于 [[$tokens]]。
+     */
+    public $extraTokens = [];
+
+    /**
+     * {@inheritdoc}
+     */
+    public function init()
+    {
+        if ($this->extraTokens) {
+            $this->tokens = $this->extraTokens + $this->tokens;
+        }
+        
+        parent::init();
+    }
 }

@@ -54,7 +54,7 @@ class IndexAction extends Action
      * 查询并列出多个模型。
      * 
      * 该方法依次执行以下步骤：
-     * 1. 当设置了 [[$checkAccess]] 时，调用该回调方法检查动作权限；
+     * 1. 当设置了 [[$checkActionAccess]] 时，调用该回调方法检查动作权限；
      * 2. 调用 [[afterPrepareDataProvider()]]，触发 [[EVENT_AFTER_PREPARE_DATA_PROVIDER]] 事件；
      * 
      * @return \yii\data\ActiveDataProvider 需要显示的数据源。
@@ -62,8 +62,8 @@ class IndexAction extends Action
     public function run()
     {
         // 检查动作权限。
-        if ($this->checkAccess) {
-            call_user_func($this->checkAccess, $this);
+        if ($this->checkActionAccess) {
+            call_user_func($this->checkActionAccess, $this);
         }
 
         // 获取请求参数。

@@ -18,31 +18,37 @@ use yii\web\NotFoundHttpException;
 class Action extends \yii\rest\Action
 {
     /**
+     * @event ActionEvent 在准备完数据源后触发的事件。
+     */
+    const EVENT_AFTER_PREPARE_DATA_PROVIDER = 'afterPrepareDataProvider';
+    
+    /**
      * @event ActionEvent 在准备完模型后触发的事件。
      */
     const EVENT_AFTER_PREPARE_MODEL = 'afterPrepareModel';
 
     /**
-     * @event ActionEvent 在模型加载完数据后触发的事件。
+     * @event ActionEvent 在模型加载数据前触发的事件。
+     * 设置 [[ActionEvent::$isValid]] 为 `false`，可以阻止模型加载数据。
+     */
+    const EVENT_BEFORE_LOAD_MODEL = 'beforeLoadModel';
+    
+    /**
+     * @event ActionEvent 在模型成功加载完数据后触发的事件。
      */
     const EVENT_AFTER_LOAD_MODEL = 'afterLoadModel';
 
     /**
      * @event ActionEvent 在处理模型前触发的事件。
-     * 设置 [[ActionEvent::$isValid]] 为 `false`，可以停止之后的处理。
+     * 设置 [[ActionEvent::$isValid]] 为 `false`，可以阻止处理模型。
      */
     const EVENT_BEFORE_PROCESS_MODEL = 'beforeProcessModel';
     
     /**
-     * @event ActionEvent 在处理完模型后触发的事件。
+     * @event ActionEvent 在成功处理完模型后触发的事件。
      */
     const EVENT_AFTER_PROCESS_MODEL = 'afterProcessModel';
 
-    /**
-     * @event ActionEvent 在准备完数据源后触发的事件。
-     */
-    const EVENT_AFTER_PREPARE_DATA_PROVIDER = 'afterPrepareDataProvider';
-    
     /**
      * @var callable 检查动作权限的回调方法。
      * 回调方法没有返回值，如果没有权限，则抛出一个异常。
@@ -54,7 +60,7 @@ class Action extends \yii\rest\Action
      * }
      * ```
      */
-    public $checkAccess;
+    public $checkActionAccess;
     
     /**
      * @var callable 检查模型权限的回调方法。
@@ -154,10 +160,11 @@ class Action extends \yii\rest\Action
     {
         // 根据给定的主键查询数据模型。
         $model = $this->findModel($id);
+        if ($model) {
+            // 执行在准备完模型后的方法和事件。
+            $this->afterPrepareModel($model);
+        }
         
-        // 执行在准备完模型后的方法和事件。
-        $this->afterPrepareModel($model);
-
         // 返回模型。
         return $model;
     }
@@ -182,27 +189,54 @@ class Action extends \yii\rest\Action
      * 为模型加载数据。
      * 
      * 该方法依次执行以下步骤：
-     * 1. 调用 [[$model::load()]]；
-     * 2. 调用 [[afterLoadModel()]]，触发 [[EVENT_AFTER_LOAD_MODEL]] 事件；
+     * 1. 调用 [[beforeLoadModel()]]，触发 [[EVENT_BEFORE_LOAD_MODEL]] 事件，如果方法返回 `false`，则跳过后续的处理；
+     * 2. 调用 [[$model::load()]]，如果方法返回 `false`，则跳过后续的处理；
+     * 3. 成功加载数据后调用 [[afterLoadModel()]]，触发 [[EVENT_AFTER_LOAD_MODEL]] 事件；
      * 
      * @param \yii\base\Model $model 需要加载数据的模型。
      * @param array $data 需要加载的数据。
-     * @return \yii\base\Model 加载完数据后的模型。
+     * @return boolean 加载是否成功。
      */
     public function loadModel($model, $data)
     {
-        // 加载数据。
-        $model->load($data, '');
+        // 执行模型加载数据前的方法和事件。
+        if ($this->beforeLoadModel($data)) {
+            // 加载数据。
+            if ($model->load($data, '')) {
+                // 执行模型成功加载完数据后的方法和事件。
+                $this->afterLoadModel($model);
+                
+                return true;
+            }
+        }
         
-        // 执行模型加载完数据后的方法和事件。
-        $this->afterLoadModel($model);
-        
-        // 返回模型。
-        return $model;
+        return false;
     }
 
     /**
-     * 在模型加载完数据后调用此方法。
+     * 在模型加载数据前调用此方法。
+     * 默认实现了触发 [[EVENT_BEFORE_LOAD_MODEL]] 事件。
+     * 
+     * 在事件中设置 [[ActionEvent::$isValid]] 为 `false`，可以阻止模型加载数据。
+     *
+     * @param array $data 将要加载的数据。
+     * @return boolean 动作是否有效。
+     */
+    public function beforeLoadModel(&$data)
+    {
+        $event = Yii::createObject([
+            'class' => ActionEvent::className(),
+            'object' => $data,
+        ]);
+    
+        $this->trigger(self::EVENT_BEFORE_LOAD_MODEL, $event);
+        $data = $event->object;
+        
+        return $event->isValid;
+    }
+
+    /**
+     * 在模型成功加载完数据后调用此方法。
      * 默认实现了触发 [[EVENT_AFTER_LOAD_MODEL]] 事件。
      *
      * @param object $object 对像实例。
@@ -221,7 +255,7 @@ class Action extends \yii\rest\Action
      * 在处理模型前调用此方法。
      * 默认实现了触发 [[EVENT_BEFORE_PROCESS_MODEL]] 事件。
      * 
-     * 在事件中设置 [[ActionEvent::$isValid]] 为 `false`，可以停止之后的处理。
+     * 在事件中设置 [[ActionEvent::$isValid]] 为 `false`，可以阻止处理模型。
      *
      * @param object $object 对像实例。
      * @return boolean 动作是否有效。
@@ -238,7 +272,7 @@ class Action extends \yii\rest\Action
     }
     
     /**
-     * 在处理完模型后调用此方法。
+     * 在成功处理完模型后调用此方法。
      * 默认实现了触发 [[EVENT_AFTER_PROCESS_MODEL]] 事件。
      *
      * @param object $object 对像实例。

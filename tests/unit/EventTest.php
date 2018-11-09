@@ -99,7 +99,6 @@ class EventTest extends TestCase
             'response' => $this->response,
             'modelClass' => TestActive::className(),
             'on afterPrepareModel' => function ($event) {
-                $this->tester->assertEquals('TestName1', $event->object->name);
                 $event->object->name .= '-afterPrepareModel';
             }
         ]);
@@ -118,32 +117,32 @@ class EventTest extends TestCase
             'response' => $this->response,
             'modelClass' => TestActive::className(),
             'viewAction' => false,
+            'on beforeLoadModel' => function ($event) {
+                $event->object['name'] .= '-beforeLoadModel';
+            },
             'on afterLoadModel' => function ($event) {
-                $this->tester->assertEquals('TestName10', $event->object->name);
                 $event->object->name .= '-afterLoadModel';
             },
             'on beforeProcessModel' => function ($event) {
-                $this->tester->assertEquals('TestName10-afterLoadModel', $event->object->name);
                 $event->object->name .= '-beforeProcessModel';
             },
             'on afterProcessModel' => function ($event) {
-                $this->tester->assertEquals('TestName10-afterLoadModel-beforeProcessModel', $event->object->name);
                 $event->object->name .= '-afterProcessModel';
             },
         ]);
 
         $this->request->setBodyParams(['id' => 10, 'name' => 'TestName10', 'title' => 'TestTitle10']);
         $model = $action->run();
+        
+        $name = 'TestName10-beforeLoadModel-afterLoadModel-beforeProcessModel';
         $this->tester->seeRecord(TestActive::className(), [
             'id' => 10, 
-            'name' => 'TestName10-afterLoadModel-beforeProcessModel',
+            'name' => $name,
             'title' => 'TestTitle10'
         ]);
-        $this->tester->assertEquals([
-            'id' => 10, 
-            'name' => 'TestName10-afterLoadModel-beforeProcessModel-afterProcessModel', 
-            'title' => 'TestTitle10'
-        ], $model->attributes);
+        
+        $name .= '-afterProcessModel';
+        $this->tester->assertEquals($name, $model->name);
     }
     
     /**
@@ -156,36 +155,41 @@ class EventTest extends TestCase
             'response' => $this->response,
             'modelClass' => TestActive::className(),
             'on afterPrepareModel' => function ($event) {
-                $this->tester->assertEquals('TestName1', $event->object->name);
                 $event->object->name .= '-afterPrepareModel';
             },
+            'on beforeLoadModel' => function ($event) {
+                $event->object['title'] .= '-beforeLoadModel';
+            },
             'on afterLoadModel' => function ($event) {
-                $this->tester->assertEquals('TestName1-afterPrepareModel', $event->object->name);
                 $event->object->name .= '-afterLoadModel';
+                $event->object->title .= '-afterLoadModel';
             },
             'on beforeProcessModel' => function ($event) {
-                $this->tester->assertEquals('TestName1-afterPrepareModel-afterLoadModel', $event->object->name);
                 $event->object->name .= '-beforeProcessModel';
+                $event->object->title .= '-beforeProcessModel';
             },
             'on afterProcessModel' => function ($event) {
-                $this->tester->assertEquals('TestName1-afterPrepareModel-afterLoadModel-beforeProcessModel', $event->object->name);
                 $event->object->name .= '-afterProcessModel';
+                $event->object->title .= '-afterProcessModel';
             },
         ]);
 
         $this->request->setBodyParams(['title' => 'TestTitle10']);
         $model = $action->run(1);
+        
+        $name = 'TestName1-afterPrepareModel-afterLoadModel-beforeProcessModel';
+        $title = 'TestTitle10-beforeLoadModel-afterLoadModel-beforeProcessModel';
         $this->tester->seeRecord(TestActive::className(), [
             'id' => 1, 
-            'name' => 'TestName1-afterPrepareModel-afterLoadModel-beforeProcessModel', 
-            'title' => 'TestTitle10'
+            'name' => $name, 
+            'title' => $title
         ]);
         
-        $this->tester->assertEquals([
-            'id' => 1, 
-            'name' => 'TestName1-afterPrepareModel-afterLoadModel-beforeProcessModel-afterProcessModel', 
-            'title' => 'TestTitle10'
-        ], $model->attributes);
+        $name .= '-afterProcessModel';
+        $this->tester->assertEquals($name, $model->name);
+        
+        $title .= '-afterProcessModel';
+        $this->tester->assertEquals($title, $model->title);
     }
     
     /**
@@ -198,16 +202,13 @@ class EventTest extends TestCase
             'response' => $this->response,
             'modelClass' => TestActive::className(),
             'on afterPrepareModel' => function ($event) {
-                $this->tester->assertEquals('TestName1', $event->object->name);
                 $event->object->name .= '-afterPrepareModel';
             },
             'on beforeProcessModel' => function ($event) {
-                $this->tester->assertEquals('TestName1-afterPrepareModel', $event->object->name);
                 $event->object->name .= '-beforeProcessModel';
             },
             'on afterProcessModel' => function ($event) {
                 $this->tester->assertEquals('TestName1-afterPrepareModel-beforeProcessModel', $event->object->name);
-                $event->object->name .= '-beforeProcessModel';
             },
         ]);
         
@@ -224,17 +225,17 @@ class EventTest extends TestCase
             'request' => $this->request,
             'response' => $this->response,
             'modelClass' => TestActive::className(),
+            'on beforeLoadModel' => function ($event) {
+                $event->object['name'] .= '-beforeLoadModel';
+            },
             'on afterLoadModel' => function ($event) {
-                $this->tester->assertEquals('TestName10', $event->object->name);
                 $event->object->name .= '-afterLoadModel';
             },
             'on beforeProcessModel' => function ($event) {
-                $this->tester->assertEquals('TestName10-afterLoadModel', $event->object->name);
                 $event->object->name .= '-beforeProcessModel';
             },
             'on afterProcessModel' => function ($event) {
-                $this->tester->assertEquals('TestName10-afterLoadModel-beforeProcessModel', $event->object->name);
-                $event->object->name .= '-afterProcessModel';
+                $this->tester->assertEquals('TestName10-beforeLoadModel-afterLoadModel-beforeProcessModel', $event->object->name);
             },
         ]);
 
@@ -252,20 +253,22 @@ class EventTest extends TestCase
             'response' => $this->response,
             'modelClass' => TestActive::className(),
             'on afterPrepareModel' => function ($event) {
-                $this->tester->assertEquals('TestName1', $event->object->name);
                 $event->object->name .= '-afterPrepareModel';
             },
+            'on beforeLoadModel' => function ($event) {
+                $event->object['title'] .= '-beforeLoadModel';
+            },
             'on afterLoadModel' => function ($event) {
-                $this->tester->assertEquals('TestName1-afterPrepareModel', $event->object->name);
                 $event->object->name .= '-afterLoadModel';
+                $event->object->title .= '-afterLoadModel';
             },
             'on beforeProcessModel' => function ($event) {
-                $this->tester->assertEquals('TestName1-afterPrepareModel-afterLoadModel', $event->object->name);
                 $event->object->name .= '-beforeProcessModel';
+                $event->object->title .= '-beforeProcessModel';
             },
             'on afterProcessModel' => function ($event) {
                 $this->tester->assertEquals('TestName1-afterPrepareModel-afterLoadModel-beforeProcessModel', $event->object->name);
-                $event->object->name .= '-afterProcessModel';
+                $this->tester->assertEquals('TestTitle10-beforeLoadModel-afterLoadModel-beforeProcessModel', $event->object->title);
             },
         ]);
 
@@ -305,6 +308,9 @@ class EventTest extends TestCase
             'request' => $this->request,
             'response' => $this->response,
             'modelClass' => TestActive::className(),
+            'on beforeLoadModel' => function ($event) {
+                $event->object['name'] .= '-beforeLoadModel';
+            },
             'on afterLoadModel' => function ($event) {
                 $event->object->name .= '-afterLoadModel';
             },
@@ -333,13 +339,16 @@ class EventTest extends TestCase
         $this->tester->assertCount(3, $models);
         foreach ($models as $data) {
             $model = $data['data'];
+            
+            $name = "TestName{$model->id}-beforeLoadModel-afterLoadModel-beforeProcessModel";
             $this->tester->seeRecord(TestActive::className(), [
                 'id' => $model->id,
-                'name' => "TestName{$model->id}-afterLoadModel-beforeProcessModel",
+                'name' => $name,
                 'title' => "TestTitle{$model->id}",
             ]);
             
-            $this->tester->assertEquals("TestName{$model->id}-afterLoadModel-beforeProcessModel-afterProcessModel-afterProcessModels", $model->name);
+            $name .= '-afterProcessModel-afterProcessModels';
+            $this->tester->assertEquals($name, $model->name);
         }
     }
     
@@ -355,19 +364,26 @@ class EventTest extends TestCase
             'on afterPrepareModel' => function ($event) {
                 $event->object->name .= '-afterPrepareModel';
             },
+            'on beforeLoadModel' => function ($event) {
+                $event->object['title'] .= '-beforeLoadModel';
+            },
             'on afterLoadModel' => function ($event) {
                 $event->object->name .= '-afterLoadModel';
+                $event->object->title .= '-afterLoadModel';
             },
             'on beforeProcessModel' => function ($event) {
                 $event->object->name .= '-beforeProcessModel';
+                $event->object->title .= '-beforeProcessModel';
             },
             'on afterProcessModel' => function ($event) {
                 $event->object->name .= '-afterProcessModel';
+                $event->object->title .= '-afterProcessModel';
             },
             'on afterProcessModels' => function ($event) {
                 $object = $event->object;
                 foreach ($object as $key => $value) {
                     $value['data']->name .= '-afterProcessModels';
+                    $value['data']->title .= '-afterProcessModels';
                 }
             },
         ]);
@@ -382,16 +398,21 @@ class EventTest extends TestCase
         $this->tester->assertTrue($models->isAfterProcessModels());
         $this->tester->assertCount(3, $models);
         foreach ($models as $key => $data) {
+            $model = $data['data'];
+            
             $name = "TestName{$key}-afterPrepareModel-afterLoadModel-beforeProcessModel";
+            $title = "TestTitle1{$key}-beforeLoadModel-afterLoadModel-beforeProcessModel";
             $this->tester->seeRecord(TestActive::className(), [
                 'id' => $key,
                 'name' => $name,
-                'title' => "TestTitle1{$key}",
+                'title' => $title,
             ]);
 
-            $model = $data['data'];
-            $expected = $name . '-afterProcessModel-afterProcessModels';
-            $this->tester->assertEquals($expected, $model->name);
+            $name .= '-afterProcessModel-afterProcessModels';
+            $this->tester->assertEquals($name, $model->name);
+            
+            $title .= '-afterProcessModel-afterProcessModels';
+            $this->tester->assertEquals($title, $model->title);
         }
     }
     
@@ -415,8 +436,8 @@ class EventTest extends TestCase
             },
             'on afterProcessModels' => function ($event) {
                 foreach ($event->object as $key => $value) {
-                    $expected = "TestName{$key}-afterPrepareModel-beforeProcessModel-afterProcessModel";
-                    $this->tester->assertEquals($expected, $value['data']->name);
+                    $name = "TestName{$key}-afterPrepareModel-beforeProcessModel-afterProcessModel";
+                    $this->tester->assertEquals($name, $value['data']->name);
                 }
             },
         ]);

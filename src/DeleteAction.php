@@ -21,7 +21,7 @@ class DeleteAction extends Action
      * 删除一个模型。
      * 
      * 该方法依次执行以下步骤：
-     * 1. 当设置了 [[$checkAccess]] 时，调用该回调方法检查动作权限；
+     * 1. 当设置了 [[$checkActionAccess]] 时，调用该回调方法检查动作权限；
      * 2. 调用 [[findModel()]]，查找数据模型；
      * 3. 调用 [[afterPrepareModel()]]，触发 [[EVENT_AFTER_PREPARE_MODEL]] 事件；
      * 4. 当设置了 [[$checkModelAccess]] 时，调用该回调方法检查模型权限；
@@ -35,8 +35,8 @@ class DeleteAction extends Action
     public function run($id)
     {
         // 检查动作权限。
-        if ($this->checkAccess) {
-            call_user_func($this->checkAccess, $this);
+        if ($this->checkActionAccess) {
+            call_user_func($this->checkActionAccess, $this);
         }
 
         // 准备模型。
