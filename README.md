@@ -198,4 +198,5 @@ Events
 Behaviors
 ---------
 
-- `EagerLoadingBehavior` 需要手动附加到 `IndexAction`，可以即时加载指定的额外资源，防止多次查询。
+- `EagerLoadingBehavior` 需要手动附加到 `IndexAction`，实现了在执行 [[Action::EVENT_AFTER_PREPARE_DATA_PROVIDER]] 事件时，即时加载指定的额外资源。
+- `SuppressResponseCodeBehavior` 需要手动附加到 `config` 中的 `components.response`，实现了根据查询参数 [[$suppressResponseCodeParam]]，判断是否始终使用 `200` 作为 HTTP 状态，并将实际的 HTTP 状态码作为内容的一部分包含在响应中。

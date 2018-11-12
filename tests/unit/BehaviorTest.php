@@ -42,9 +42,9 @@ class BehaviorTest extends TestCase
     }
     
     /**
-     * test index action
+     * test eager loading behavior
      */
-    public function testIndexAction()
+    public function testEagerLoadingBehavior()
     {
         $action = new IndexAction('index', null, [
             'request' => $this->request,
