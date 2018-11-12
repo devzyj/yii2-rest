@@ -69,19 +69,21 @@ return [
 创建多个新用户时的数据格式：
 
 ```
--d [
-    {"username": "example1", "email": "user1@example.com"},
-    {"username": "example2", "email": "user2@example.com"}
-]
+POST /users/batch
+    -d [
+        {"username": "example1", "email": "user1@example.com"},
+        {"username": "example2", "email": "user2@example.com"}
+    ]
 ```
 
 更新用户 123 和 456 时的数据格式：
 
 ```
--d {
-    "123": {"username": "example1", "email": "user1@example.com"},
-    "456": {"username": "example2", "email": "user2@example.com"}
-}
+PUT /users/batch
+    -d {
+        "123": {"username": "example1", "email": "user1@example.com"},
+        "456": {"username": "example2", "email": "user2@example.com"}
+    }
 ```
 
 

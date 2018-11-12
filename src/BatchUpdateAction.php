@@ -12,6 +12,36 @@ use yii\base\Model;
 /**
  * BatchUpdateAction 实现了用于更新多个模型的 API 端点。
  * 
+ * For example:
+ * 
+ * ```
+ * // 假如用户 `11` 不存在，或者没有权限。
+ * $ PUT /users/batch
+ *     -d {
+ *         "10": {"username": "example10", "email": "user10@example.com"},
+ *         "11": {"username": "example11", "email": "user11@example.com"},
+ *         "12": {"username": "example12", "email": "user12@example.com"}
+ *     }
+ * 
+ * HTTP/1.1 200 OK
+ * ...
+ * Content-Type: application/json; charset=UTF-8
+ * 
+ * {
+ *     "10": {
+ *         "success": true,
+ *         "data": {"id": 10, "username": "example10", "email": "user10@example.com"}
+ *     },
+ *     "12": {
+ *         "success": false,
+ *         "data": [
+ *             {"field": "username", "message": "username `example12` error."},
+ *             {"field": "email", "message": "email `user12@example.com` error."}
+ *         ]
+ *     }
+ * }
+ * ```
+ * 
  * @author ZhangYanJiong <zhangyanjiong@163.com>
  * @since 1.0
  */

@@ -13,6 +13,17 @@ use yii\web\ServerErrorHttpException;
 /**
  * UpdateValidateAction 实现了用于更新模型时，验证数据的 API 端点。
  * 
+ * For example:
+ * 
+ * ```
+ * $ PUT /users/1/batch
+ *     -d {"username": "example1", "email": "user1@example.com"}
+ * 
+ * HTTP/1.1 204 No Content
+ * ...
+ * 
+ * ```
+ * 
  * @author ZhangYanJiong <zhangyanjiong@163.com>
  * @since 1.0
  */

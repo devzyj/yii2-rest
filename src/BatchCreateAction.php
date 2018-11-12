@@ -12,6 +12,35 @@ use yii\base\Model;
 /**
  * BatchCreateAction 实现了从给定的数据创建多个新模型的 API 端点。
  * 
+ * For example:
+ * 
+ * ```
+ * $ POST /users/batch
+ *     -d [
+ *         {"username": "example1", "email": "user1@example.com"},
+ *         {"username": "example2", "email": "user2@example.com"},
+ *         ...
+ *     ]
+ * 
+ * HTTP/1.1 200 OK
+ * ...
+ * Content-Type: application/json; charset=UTF-8
+ * 
+ * [
+ *     {
+ *         "success": true,
+ *         "data": {"id": 1, "username": "example1", "email": "user1@example.com"}
+ *     },
+ *     {
+ *         "success": false,
+ *         "data": [
+ *             {"field": "username", "message": "username `example2` error."},
+ *             {"field": "email", "message": "email `user2@example.com` error."}
+ *         ]
+ *     }
+ * ]
+ * ```
+ * 
  * @author ZhangYanJiong <zhangyanjiong@163.com>
  * @since 1.0
  */

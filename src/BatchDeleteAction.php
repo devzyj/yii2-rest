@@ -11,6 +11,30 @@ use Yii;
 /**
  * BatchDeleteAction 实现了用于删除多个模型的 API 端点。
  * 
+ * For example:
+ * 
+ * ```
+ * // 假如用户 `11` 不存在，或者没有权限。
+ * $ DELETE /users/10;11;12
+ * 
+ * HTTP/1.1 200 OK
+ * ...
+ * Content-Type: application/json; charset=UTF-8
+ * 
+ * {
+ *     "10": {
+ *         "success": true,
+ *         "data": {"id": 10, "username": "example10", "email": "user10@example.com"}
+ *     },
+ *     "12": {
+ *         "success": false,
+ *         "data": [
+ *             {"field": "id", "message": "Failed to delete the object for unknown reason."}
+ *         ]
+ *     }
+ * }
+ * ```
+ * 
  * @author ZhangYanJiong <zhangyanjiong@163.com>
  * @since 1.0
  */

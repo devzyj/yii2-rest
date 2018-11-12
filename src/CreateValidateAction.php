@@ -13,6 +13,17 @@ use yii\web\ServerErrorHttpException;
 /**
  * CreateValidateAction 实现了从给定的数据创建新模型时，验证数据的 API 端点。
  * 
+ * For example:
+ * 
+ * ```
+ * $ POST /users/batch
+ *     -d {"username": "example1", "email": "user1@example.com"}
+ * 
+ * HTTP/1.1 204 No Content
+ * ...
+ * 
+ * ```
+ * 
  * @author ZhangYanJiong <zhangyanjiong@163.com>
  * @since 1.0
  */

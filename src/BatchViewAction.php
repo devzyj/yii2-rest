@@ -11,6 +11,22 @@ use Yii;
 /**
  * BatchViewAction 实现了返回关于多个模型详细信息的 API 端点。
  * 
+ * For example:
+ * 
+ * ```
+ * // 假如用户 `11` 不存在，或者没有权限。
+ * $ GET /users/10;11;12
+ * 
+ * HTTP/1.1 200 OK
+ * ...
+ * Content-Type: application/json; charset=UTF-8
+ * 
+ * {
+ *     "10": {"id" => 10, "username": "example10", "email": "user10@example.com"},
+ *     "12": {"id" => 12, "username": "example12", "email": "user12@example.com"}
+ * }
+ * ```
+ * 
  * @author ZhangYanJiong <zhangyanjiong@163.com>
  * @since 1.0
  */
