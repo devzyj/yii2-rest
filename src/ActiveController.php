@@ -6,8 +6,6 @@
  */
 namespace devzyj\rest;
 
-use yii\helpers\ArrayHelper;
-
 /**
  * ActiveController 实现了一组公共操作，用于支持对 ActiveRecord 的 RESTful API 访问。
  * 
@@ -60,28 +58,42 @@ class ActiveController extends \yii\rest\ActiveController
      */
     public function actions()
     {
-        return ArrayHelper::merge(parent::actions(), [
+        return [
             'index' => [
                 'class' => 'devzyj\rest\IndexAction',
                 'modelClass' => $this->searchModelClass,
+                'checkActionAccess' => [$this, 'checkActionAccess'],
             ],
             'view' => [
                 'class' => 'devzyj\rest\ViewAction',
+                'modelClass' => $this->modelClass,
+                'checkActionAccess' => [$this, 'checkActionAccess'],
                 'checkModelAccess' => [$this, 'checkModelAccess'],
                 'notFoundMessage' => $this->notFoundMessage,
             ],
             'create' => [
                 'class' => 'devzyj\rest\CreateAction',
+                'modelClass' => $this->modelClass,
+                'checkActionAccess' => [$this, 'checkActionAccess'],
+                'scenario' => $this->createScenario,
             ],
             'update' => [
                 'class' => 'devzyj\rest\UpdateAction',
+                'modelClass' => $this->modelClass,
+                'checkActionAccess' => [$this, 'checkActionAccess'],
                 'checkModelAccess' => [$this, 'checkModelAccess'],
+                'scenario' => $this->updateScenario,
                 'notFoundMessage' => $this->notFoundMessage,
             ],
             'delete' => [
                 'class' => 'devzyj\rest\DeleteAction',
+                'modelClass' => $this->modelClass,
+                'checkActionAccess' => [$this, 'checkActionAccess'],
                 'checkModelAccess' => [$this, 'checkModelAccess'],
                 'notFoundMessage' => $this->notFoundMessage,
+            ],
+            'options' => [
+                'class' => 'yii\rest\OptionsAction',
             ],
             'create-validate' => [
                 'class' => 'devzyj\rest\CreateValidateAction',
@@ -93,8 +105,8 @@ class ActiveController extends \yii\rest\ActiveController
                 'class' => 'devzyj\rest\UpdateValidateAction',
                 'modelClass' => $this->modelClass,
                 'checkActionAccess' => [$this, 'checkActionAccess'],
-                'scenario' => $this->updateScenario,
                 'checkModelAccess' => [$this, 'checkModelAccess'],
+                'scenario' => $this->updateScenario,
                 'notFoundMessage' => $this->notFoundMessage,
             ],
             'batch-view' => [
@@ -118,9 +130,8 @@ class ActiveController extends \yii\rest\ActiveController
                 'class' => 'devzyj\rest\BatchUpdateAction',
                 'modelClass' => $this->modelClass,
                 'checkActionAccess' => [$this, 'checkActionAccess'],
-                'scenario' => $this->updateScenario,
                 'checkModelAccess' => [$this, 'checkModelAccess'],
-                'notFoundMessage' => $this->notFoundMessage,
+                'scenario' => $this->updateScenario,
                 'allowedCount' => $this->allowedCount,
                 'manyResourcesMessage' => $this->manyResourcesMessage,
             ],
@@ -129,11 +140,10 @@ class ActiveController extends \yii\rest\ActiveController
                 'modelClass' => $this->modelClass,
                 'checkActionAccess' => [$this, 'checkActionAccess'],
                 'checkModelAccess' => [$this, 'checkModelAccess'],
-                'notFoundMessage' => $this->notFoundMessage,
                 'allowedCount' => $this->allowedCount,
                 'manyResourcesMessage' => $this->manyResourcesMessage,
             ],
-        ]);
+        ];
     }
     
     /**
@@ -141,14 +151,19 @@ class ActiveController extends \yii\rest\ActiveController
      */
     protected function verbs()
     {
-        return ArrayHelper::merge(parent::verbs(), [
+        return [
+            'index' => ['GET', 'HEAD'],
+            'view' => ['GET', 'HEAD'],
+            'create' => ['POST'],
+            'update' => ['PUT', 'PATCH'],
+            'delete' => ['DELETE'],
             'create-validate' => ['POST'],
             'update-validate' => ['PUT', 'PATCH'],
             'bartch-view' => ['GET'],
             'bartch-create' => ['POST'],
             'bartch-update' => ['PUT', 'PATCH'],
             'bartch-delete' => ['DELETE'],
-        ]);
+        ];
     }
 
     /**
@@ -157,9 +172,7 @@ class ActiveController extends \yii\rest\ActiveController
      * @deprecated 使用 [[checkActionAccess()]] 和 [[checkModelAccess()]] 检查权限。
      */
     public function checkAccess($action, $model = null, $params = [])
-    {
-        parent::checkAccess($action, $model, $params);
-    }
+    {}
     
     /**
      * 检查用户是否有执行当前动作的权限。

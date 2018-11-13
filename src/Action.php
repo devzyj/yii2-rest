@@ -50,6 +50,13 @@ class Action extends \yii\rest\Action
     const EVENT_AFTER_PROCESS_MODEL = 'afterProcessModel';
 
     /**
+     * {@inheritdoc}
+     * 
+     * @deprecated 使用 [[$checkActionAccess]] 和 [[$checkModelAccess]] 检查权限。
+     */
+    public $checkAccess;
+    
+    /**
      * @var callable 检查动作权限的回调方法。
      * 回调方法没有返回值，如果没有权限，则抛出一个异常。
      * 
