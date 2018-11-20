@@ -41,6 +41,16 @@ use Yii;
 class BatchDeleteAction extends BatchAction
 {
     /**
+     * @var string 删除模型失败时的错误信息。
+     */
+    public $failedMessage = 'Failed to delete the object for unknown reason.';
+
+    /**
+     * @var string 跳过删除模型时的错误信息。
+     */
+    public $skippedMessage = 'Skipped delete the object for unknown reason.';
+    
+    /**
      * 删除多个模型。
      * 
      * 该方法依次执行以下步骤：
@@ -122,7 +132,7 @@ class BatchDeleteAction extends BatchAction
                 return true;
             }
         } elseif (!$model->hasErrors()) {
-            $model->addErrors(array_fill_keys($model::primaryKey(), 'Skipped delete the object for unknown reason.'));
+            $model->addErrors(array_fill_keys($model::primaryKey(), $this->skippedMessage));
         }
         
         return false;
@@ -137,7 +147,7 @@ class BatchDeleteAction extends BatchAction
     protected function deleteModel($model)
     {
         if ($model->delete() === false) {
-            $model->addErrors(array_fill_keys($model::primaryKey(), 'Failed to delete the object for unknown reason.'));
+            $model->addErrors(array_fill_keys($model::primaryKey(), $this->failedMessage));
             return false;
         }
         

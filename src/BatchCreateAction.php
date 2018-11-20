@@ -50,6 +50,16 @@ class BatchCreateAction extends BatchAction
      * @var string 在新模型被验证和保存之前，要分配给它的场景。
      */
     public $scenario = Model::SCENARIO_DEFAULT;
+
+    /**
+     * @var string 创建模型失败时的错误信息。
+     */
+    public $failedMessage = 'Failed to create the object for unknown reason.';
+    
+    /**
+     * @var string 跳过创建模型时的错误信息。
+     */
+    public $skippedMessage = 'Skipped create the object for unknown reason.';
     
     /**
      * 创建多个新模型。
@@ -135,7 +145,7 @@ class BatchCreateAction extends BatchAction
                 return true;
             }
         } elseif (!$model->hasErrors()) {
-            $model->addErrors(array_fill_keys($model::primaryKey(), 'Skipped create the object for unknown reason.'));
+            $model->addErrors(array_fill_keys($model::primaryKey(), $this->skippedMessage));
         }
         
         return false;
@@ -155,7 +165,7 @@ class BatchCreateAction extends BatchAction
             return false;
         }
 
-        $model->addErrors(array_fill_keys($model::primaryKey(), 'Failed to create the object for unknown reason.'));
+        $model->addErrors(array_fill_keys($model::primaryKey(), $this->failedMessage));
         return false;
     }
 }

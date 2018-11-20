@@ -24,6 +24,26 @@ class UpdateAction extends Action
     public $scenario = Model::SCENARIO_DEFAULT;
 
     /**
+     * @var string 更新模型失败时的错误信息。
+     */
+    public $failedMessage = 'Failed to update the object for unknown reason.';
+    
+    /**
+     * @var integer 更新模型失败时的错误编码。
+     */
+    public $failedCode = 0;
+    
+    /**
+     * @var string 跳过更新模型时的错误信息。
+     */
+    public $skippedMessage = 'Skipped update the object for unknown reason.';
+    
+    /**
+     * @var integer 跳过更新模型时的错误编码。
+     */
+    public $skippedCode = 0;
+    
+    /**
      * 更新现有模型。
      * 
      * 该方法依次执行以下步骤：
@@ -86,7 +106,7 @@ class UpdateAction extends Action
                 $this->afterProcessModel($model);
             }
         } elseif (!$model->hasErrors()) {
-            throw new ServerErrorHttpException('Skipped update the object for unknown reason.');
+            throw new ServerErrorHttpException($this->skippedMessage, $this->skippedCode);
         }
         
         // 返回处理后的模型。
@@ -108,6 +128,6 @@ class UpdateAction extends Action
             return false;
         }
         
-        throw new ServerErrorHttpException('Failed to update the object for unknown reason.');
+        throw new ServerErrorHttpException($this->failedMessage, $this->failedCode);
     }
 }

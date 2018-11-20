@@ -28,6 +28,26 @@ class CreateAction extends Action
      * @var string|false 视图操作的名称。当模型成功创建时，需要使用此属性创建 URL。`false` 表示不创建 URL。
      */
     public $viewAction = 'view';
+    
+    /**
+     * @var string 创建模型失败时的错误信息。
+     */
+    public $failedMessage = 'Failed to create the object for unknown reason.';
+
+    /**
+     * @var integer 创建模型失败时的错误编码。
+     */
+    public $failedCode = 0;
+
+    /**
+     * @var string 跳过创建模型时的错误信息。
+     */
+    public $skippedMessage = 'Skipped create the object for unknown reason.';
+    
+    /**
+     * @var integer 跳过创建模型时的错误编码。
+     */
+    public $skippedCode = 0;
 
     /**
      * 创建一个新模型。
@@ -93,7 +113,7 @@ class CreateAction extends Action
                 $this->afterProcessModel($model);
             }
         } elseif (!$model->hasErrors()) {
-            throw new ServerErrorHttpException('Skipped create the object for unknown reason.');
+            throw new ServerErrorHttpException($this->skippedMessage, $this->skippedCode);
         }
 
         // 返回处理后的模型。
@@ -115,6 +135,6 @@ class CreateAction extends Action
             return false;
         }
         
-        throw new ServerErrorHttpException('Failed to create the object for unknown reason.');
+        throw new ServerErrorHttpException($this->failedMessage, $this->failedCode);
     }
 }

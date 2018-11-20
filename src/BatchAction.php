@@ -37,6 +37,11 @@ class BatchAction extends Action
     public $manyResourcesMessage;
 
     /**
+     * @var integer 批量操作请求资源过多的错误编码。
+     */
+    public $manyResourcesCode;
+    
+    /**
      * @var callable 根据多个主键，获取多个模型的回调方法。
      * 方法应该只返回存在的数据，如果没有查询到数据，则返回空数组。
      * 如果没有设置，则使用 [[findModels()]]。
@@ -59,6 +64,10 @@ class BatchAction extends Action
             $this->manyResourcesMessage = 'The number of resources requested cannot exceed `{allowedCount}`.';
         }
     
+        if ($this->manyResourcesCode === null) {
+            $this->manyResourcesCode = 0;
+        }
+        
         parent::init();
     }
     
@@ -72,10 +81,11 @@ class BatchAction extends Action
     {
         $requestedCount = count($data);
         if ($this->allowedCount !== null && $requestedCount > $this->allowedCount) {
-            throw new HttpException(413, strtr($this->manyResourcesMessage, [
+            $manyResourcesMessage = strtr($this->manyResourcesMessage, [
                 '{allowedCount}' => $this->allowedCount,
                 '{requestedCount}' => $requestedCount,
-            ]));
+            ]);
+            throw new HttpException(413, $manyResourcesMessage, $this->manyResourcesCode);
         }
     }
     

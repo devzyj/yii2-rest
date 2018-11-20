@@ -19,8 +19,8 @@ use Yii;
  * return [
  *     'components' => [
  *         'response' => [
- *             'as formatterBehavior' => [
- *                 'class' => 'devzyj\rest\SuppressResponseCodeBehavior',
+ *             'as suppressResponseCodeBehavior' => [
+ *                 'class' => 'devzyj\rest\behaviors\SuppressResponseCodeBehavior',
  *                 //'suppressResponseCodeParam' => 'suppress_response_code',
  *             ]
  *         ]

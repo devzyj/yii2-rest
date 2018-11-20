@@ -53,6 +53,16 @@ class BatchUpdateAction extends BatchAction
     public $scenario = Model::SCENARIO_DEFAULT;
 
     /**
+     * @var string 更新模型失败时的错误信息。
+     */
+    public $failedMessage = 'Failed to update the object for unknown reason.';
+    
+    /**
+     * @var string 跳过更新模型时的错误信息。
+     */
+    public $skippedMessage = 'Skipped update the object for unknown reason.';
+    
+    /**
      * 更新多个现有模型。
      * 
      * 该方法依次执行以下步骤：
@@ -148,7 +158,7 @@ class BatchUpdateAction extends BatchAction
                 return true;
             }
         } elseif (!$model->hasErrors()) {
-            $model->addErrors(array_fill_keys($model::primaryKey(), 'Skipped update the object for unknown reason.'));
+            $model->addErrors(array_fill_keys($model::primaryKey(), $this->skippedMessage));
         }
 
         return false;
@@ -168,7 +178,7 @@ class BatchUpdateAction extends BatchAction
             return false;
         }
 
-        $model->addErrors(array_fill_keys($model::primaryKey(), 'Failed to update the object for unknown reason.'));
+        $model->addErrors(array_fill_keys($model::primaryKey(), $this->failedMessage));
         return false;
     }
 }

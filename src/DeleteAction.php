@@ -18,6 +18,26 @@ use yii\web\ServerErrorHttpException;
 class DeleteAction extends Action
 {
     /**
+     * @var string 删除模型失败时的错误信息。
+     */
+    public $failedMessage = 'Failed to delete the object for unknown reason.';
+
+    /**
+     * @var integer 删除模型失败时的错误编码。
+     */
+    public $failedCode = 0;
+
+    /**
+     * @var string 跳过删除模型时的错误信息。
+     */
+    public $skippedMessage = 'Skipped delete the object for unknown reason.';
+    
+    /**
+     * @var integer 跳过删除模型时的错误编码。
+     */
+    public $skippedCode = 0;
+    
+    /**
      * 删除一个模型。
      * 
      * 该方法依次执行以下步骤：
@@ -70,7 +90,7 @@ class DeleteAction extends Action
             // 调用删除成功后的方法和事件。
             $this->afterProcessModel($model);
         } elseif (!$model->hasErrors()) {
-            throw new ServerErrorHttpException('Skipped delete the object for unknown reason.');
+            throw new ServerErrorHttpException($this->skippedMessage, $this->skippedCode);
         }
     }
     
@@ -83,7 +103,7 @@ class DeleteAction extends Action
     protected function deleteModel($model)
     {
         if ($model->delete() === false) {
-            throw new ServerErrorHttpException('Failed to delete the object for unknown reason.');
+            throw new ServerErrorHttpException($this->failedMessage, $this->failedCode);
         }
     }
 }

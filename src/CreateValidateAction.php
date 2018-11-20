@@ -33,6 +33,16 @@ class CreateValidateAction extends Action
      * @var string 在新模型被验证之前，要分配给它的场景。
      */
     public $scenario = Model::SCENARIO_DEFAULT;
+
+    /**
+     * @var string 跳过验证模型时的错误信息。
+     */
+    public $skippedMessage = 'Skipped validate the object for unknown reason.';
+    
+    /**
+     * @var integer 跳过验证模型时的错误编码。
+     */
+    public $skippedCode = 0;
     
     /**
      * 验证一个新模型。
@@ -90,7 +100,7 @@ class CreateValidateAction extends Action
                 return;
             }
         } elseif (!$model->hasErrors()) {
-            throw new ServerErrorHttpException('Skipped validate the object for unknown reason.');
+            throw new ServerErrorHttpException($this->skippedMessage, $this->skippedCode);
         }
 
         // 返回验证错误的模型。

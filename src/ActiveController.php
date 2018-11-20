@@ -28,6 +28,11 @@ class ActiveController extends \yii\rest\ActiveController
      * @var string 模型不存在时的错误信息。
      */
     public $notFoundMessage;
+
+    /**
+     * @var integer 模型不存在时的错误编码。
+     */
+    public $notFoundCode;
     
     /**
      * @var integer 允许批量执行的资源个数。
@@ -39,6 +44,11 @@ class ActiveController extends \yii\rest\ActiveController
      */
     public $manyResourcesMessage;
 
+    /**
+     * @var integer 批量操作请求资源过多的错误编码。
+     */
+    public $manyResourcesCode;
+    
     /**
      * {@inheritdoc}
      */
@@ -70,6 +80,7 @@ class ActiveController extends \yii\rest\ActiveController
                 'checkActionAccess' => [$this, 'checkActionAccess'],
                 'checkModelAccess' => [$this, 'checkModelAccess'],
                 'notFoundMessage' => $this->notFoundMessage,
+                'notFoundCode' => $this->notFoundCode,
             ],
             'create' => [
                 'class' => 'devzyj\rest\CreateAction',
@@ -84,6 +95,7 @@ class ActiveController extends \yii\rest\ActiveController
                 'checkModelAccess' => [$this, 'checkModelAccess'],
                 'scenario' => $this->updateScenario,
                 'notFoundMessage' => $this->notFoundMessage,
+                'notFoundCode' => $this->notFoundCode,
             ],
             'delete' => [
                 'class' => 'devzyj\rest\DeleteAction',
@@ -91,6 +103,7 @@ class ActiveController extends \yii\rest\ActiveController
                 'checkActionAccess' => [$this, 'checkActionAccess'],
                 'checkModelAccess' => [$this, 'checkModelAccess'],
                 'notFoundMessage' => $this->notFoundMessage,
+                'notFoundCode' => $this->notFoundCode,
             ],
             'options' => [
                 'class' => 'yii\rest\OptionsAction',
@@ -108,15 +121,16 @@ class ActiveController extends \yii\rest\ActiveController
                 'checkModelAccess' => [$this, 'checkModelAccess'],
                 'scenario' => $this->updateScenario,
                 'notFoundMessage' => $this->notFoundMessage,
+                'notFoundCode' => $this->notFoundCode,
             ],
             'batch-view' => [
                 'class' => 'devzyj\rest\BatchViewAction',
                 'modelClass' => $this->modelClass,
                 'checkActionAccess' => [$this, 'checkActionAccess'],
                 'checkModelAccess' => [$this, 'checkModelAccess'],
-                'notFoundMessage' => $this->notFoundMessage,
                 'allowedCount' => $this->allowedCount,
                 'manyResourcesMessage' => $this->manyResourcesMessage,
+                'manyResourcesCode' => $this->manyResourcesCode,
             ],
             'batch-create' => [
                 'class' => 'devzyj\rest\BatchCreateAction',
@@ -125,6 +139,7 @@ class ActiveController extends \yii\rest\ActiveController
                 'scenario' => $this->createScenario,
                 'allowedCount' => $this->allowedCount,
                 'manyResourcesMessage' => $this->manyResourcesMessage,
+                'manyResourcesCode' => $this->manyResourcesCode,
             ],
             'batch-update' => [
                 'class' => 'devzyj\rest\BatchUpdateAction',
@@ -134,6 +149,7 @@ class ActiveController extends \yii\rest\ActiveController
                 'scenario' => $this->updateScenario,
                 'allowedCount' => $this->allowedCount,
                 'manyResourcesMessage' => $this->manyResourcesMessage,
+                'manyResourcesCode' => $this->manyResourcesCode,
             ],
             'batch-delete' => [
                 'class' => 'devzyj\rest\BatchDeleteAction',
@@ -142,6 +158,7 @@ class ActiveController extends \yii\rest\ActiveController
                 'checkModelAccess' => [$this, 'checkModelAccess'],
                 'allowedCount' => $this->allowedCount,
                 'manyResourcesMessage' => $this->manyResourcesMessage,
+                'manyResourcesCode' => $this->manyResourcesCode,
             ],
         ];
     }

@@ -88,6 +88,12 @@ class Action extends \yii\rest\Action
      * @see findModel()
      */
     public $notFoundMessage;
+
+    /**
+     * @var integer 模型不存在时的错误编码。
+     * @see findModel()
+     */
+    public $notFoundCode;
     
     /**
      * @var \yii\web\Request 当前的请求。如果没有设置，将使用 `Yii::$app->getRequest()`。
@@ -108,6 +114,10 @@ class Action extends \yii\rest\Action
             $this->notFoundMessage = 'Object not found: `{id}`';
         }
 
+        if ($this->notFoundCode === null) {
+            $this->notFoundCode = 0;
+        }
+        
         if ($this->request === null) {
             $this->request = Yii::$app->getRequest();
         }
@@ -148,9 +158,8 @@ class Action extends \yii\rest\Action
             return $model;
         }
     
-        throw new NotFoundHttpException(strtr($this->notFoundMessage, [
-            '{id}' => $id
-        ]));
+        $notFoundMessage = strtr($this->notFoundMessage, ['{id}' => $id]);
+        throw new NotFoundHttpException($notFoundMessage, $this->notFoundCode);
     }
     
     /**
