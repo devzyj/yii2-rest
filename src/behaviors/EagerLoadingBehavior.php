@@ -73,13 +73,13 @@ class EagerLoadingBehavior extends \yii\base\Behavior
      */
     public function afterPrepareDataProvider($event)
     {
-        if ($event->object instanceof \yii\data\ActiveDataProvider) {
+        $expand = $this->getRequestedExpand();
+        if ($expand && $event->object instanceof \yii\data\ActiveDataProvider) {
             $query = $event->object->query;
             if ($query instanceof \yii\db\ActiveQuery) {
-                /* @var $model \yii\db\ActiveRecord */
                 $modelClass = $query->modelClass;
+                /* @var $model \yii\db\ActiveRecord */
                 $model = $modelClass::instance();
-                $expand = $this->getRequestedExpand();
                 $with = [];
                 foreach ($expand as $name) {
                     if ($model->getRelation($name, false)) {
