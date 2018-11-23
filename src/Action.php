@@ -50,6 +50,16 @@ class Action extends \yii\rest\Action
     const EVENT_AFTER_PROCESS_MODEL = 'afterProcessModel';
 
     /**
+     * @var \yii\web\Request 当前的请求。如果没有设置，将使用 `Yii::$app->getRequest()`。
+     */
+    public $request;
+    
+    /**
+     * @var \yii\web\Response 要发送的响应。如果没有设置，将使用 `Yii::$app->getResponse()`。
+     */
+    public $response;
+    
+    /**
      * {@inheritdoc}
      * 
      * @deprecated 使用 [[$checkActionAccess]] 和 [[$checkModelAccess]] 检查权限。
@@ -94,22 +104,25 @@ class Action extends \yii\rest\Action
      * @see findModel()
      */
     public $notFoundCode;
-    
-    /**
-     * @var \yii\web\Request 当前的请求。如果没有设置，将使用 `Yii::$app->getRequest()`。
-     */
-    public $request;
-    
-    /**
-     * @var \yii\web\Response 要发送的响应。如果没有设置，将使用 `Yii::$app->getResponse()`。
-     */
-    public $response;
 
+    /**
+     * @var string 复合主键时使用的分隔符。
+     */
+    public $idSeparator;
+    
     /**
      * {@inheritdoc}
      */
     public function init()
     {
+        if ($this->request === null) {
+            $this->request = Yii::$app->getRequest();
+        }
+        
+        if ($this->response === null) {
+            $this->response = Yii::$app->getResponse();
+        }
+        
         if ($this->notFoundMessage === null) {
             $this->notFoundMessage = 'Object not found: `{id}`';
         }
@@ -117,13 +130,9 @@ class Action extends \yii\rest\Action
         if ($this->notFoundCode === null) {
             $this->notFoundCode = 0;
         }
-        
-        if ($this->request === null) {
-            $this->request = Yii::$app->getRequest();
-        }
-        
-        if ($this->response === null) {
-            $this->response = Yii::$app->getResponse();
+
+        if ($this->idSeparator === null) {
+            $this->idSeparator = ',';
         }
         
         parent::init();
@@ -145,7 +154,7 @@ class Action extends \yii\rest\Action
         $keys = $modelClass::primaryKey();
         if (count($keys) > 1) {
             // composite primary key.
-            $values = explode(',', $id);
+            $values = explode($this->idSeparator, $id);
             if (count($keys) === count($values)) {
                 $model = $modelClass::findOne(array_combine($keys, $values));
             }

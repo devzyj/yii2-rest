@@ -109,7 +109,7 @@ class BatchUpdateAction extends BatchAction
         $models = $this->ensureModelsAccess($models);
         
         // 对模型列表使用主键索引。
-        $models->indexByPrimaryKey();
+        $models->indexByPrimaryKey($this->idSeparator);
 
         // 批量处理结果。
         /* @var $result BatchResult */

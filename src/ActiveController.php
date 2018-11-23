@@ -33,6 +33,12 @@ class ActiveController extends \yii\rest\ActiveController
      * @var integer 模型不存在时的错误编码。
      */
     public $notFoundCode;
+
+    /**
+     * @var string 复合主键时使用的分隔符。
+     * 如果不使用 `,` 为分隔符，还需要修改 [[UrlRule::$tokens]] 中的 `{id}` 和 `{ids}` 才能生效。
+     */
+    public $idSeparator;
     
     /**
      * @var integer 允许批量执行的资源个数。
@@ -48,6 +54,12 @@ class ActiveController extends \yii\rest\ActiveController
      * @var integer 批量操作请求资源过多的错误编码。
      */
     public $manyResourcesCode;
+
+    /**
+     * @var string 多个ID时使用的分隔符。
+     * 如果不使用 `;` 为分隔符，还需要修改 [[UrlRule::$tokens]] 中的 `{ids}` 才能生效。
+     */
+    public $idsSeparator;
     
     /**
      * {@inheritdoc}
@@ -81,12 +93,14 @@ class ActiveController extends \yii\rest\ActiveController
                 'checkModelAccess' => [$this, 'checkModelAccess'],
                 'notFoundMessage' => $this->notFoundMessage,
                 'notFoundCode' => $this->notFoundCode,
+                'idSeparator' => $this->idSeparator,
             ],
             'create' => [
                 'class' => 'devzyj\rest\CreateAction',
                 'modelClass' => $this->modelClass,
                 'checkActionAccess' => [$this, 'checkActionAccess'],
                 'scenario' => $this->createScenario,
+                'idSeparator' => $this->idSeparator,
             ],
             'update' => [
                 'class' => 'devzyj\rest\UpdateAction',
@@ -96,6 +110,7 @@ class ActiveController extends \yii\rest\ActiveController
                 'scenario' => $this->updateScenario,
                 'notFoundMessage' => $this->notFoundMessage,
                 'notFoundCode' => $this->notFoundCode,
+                'idSeparator' => $this->idSeparator,
             ],
             'delete' => [
                 'class' => 'devzyj\rest\DeleteAction',
@@ -104,6 +119,7 @@ class ActiveController extends \yii\rest\ActiveController
                 'checkModelAccess' => [$this, 'checkModelAccess'],
                 'notFoundMessage' => $this->notFoundMessage,
                 'notFoundCode' => $this->notFoundCode,
+                'idSeparator' => $this->idSeparator,
             ],
             'options' => [
                 'class' => 'yii\rest\OptionsAction',
@@ -113,6 +129,7 @@ class ActiveController extends \yii\rest\ActiveController
                 'modelClass' => $this->modelClass,
                 'checkActionAccess' => [$this, 'checkActionAccess'],
                 'scenario' => $this->createScenario,
+                'idSeparator' => $this->idSeparator,
             ],
             'update-validate' => [
                 'class' => 'devzyj\rest\UpdateValidateAction',
@@ -122,6 +139,7 @@ class ActiveController extends \yii\rest\ActiveController
                 'scenario' => $this->updateScenario,
                 'notFoundMessage' => $this->notFoundMessage,
                 'notFoundCode' => $this->notFoundCode,
+                'idSeparator' => $this->idSeparator,
             ],
             'batch-view' => [
                 'class' => 'devzyj\rest\BatchViewAction',
@@ -131,6 +149,8 @@ class ActiveController extends \yii\rest\ActiveController
                 'allowedCount' => $this->allowedCount,
                 'manyResourcesMessage' => $this->manyResourcesMessage,
                 'manyResourcesCode' => $this->manyResourcesCode,
+                'idSeparator' => $this->idSeparator,
+                'idsSeparator' => $this->idsSeparator,
             ],
             'batch-create' => [
                 'class' => 'devzyj\rest\BatchCreateAction',
@@ -140,6 +160,8 @@ class ActiveController extends \yii\rest\ActiveController
                 'allowedCount' => $this->allowedCount,
                 'manyResourcesMessage' => $this->manyResourcesMessage,
                 'manyResourcesCode' => $this->manyResourcesCode,
+                'idSeparator' => $this->idSeparator,
+                'idsSeparator' => $this->idsSeparator,
             ],
             'batch-update' => [
                 'class' => 'devzyj\rest\BatchUpdateAction',
@@ -150,6 +172,8 @@ class ActiveController extends \yii\rest\ActiveController
                 'allowedCount' => $this->allowedCount,
                 'manyResourcesMessage' => $this->manyResourcesMessage,
                 'manyResourcesCode' => $this->manyResourcesCode,
+                'idSeparator' => $this->idSeparator,
+                'idsSeparator' => $this->idsSeparator,
             ],
             'batch-delete' => [
                 'class' => 'devzyj\rest\BatchDeleteAction',
@@ -159,6 +183,8 @@ class ActiveController extends \yii\rest\ActiveController
                 'allowedCount' => $this->allowedCount,
                 'manyResourcesMessage' => $this->manyResourcesMessage,
                 'manyResourcesCode' => $this->manyResourcesCode,
+                'idSeparator' => $this->idSeparator,
+                'idsSeparator' => $this->idsSeparator,
             ],
         ];
     }

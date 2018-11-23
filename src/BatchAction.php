@@ -40,6 +40,11 @@ class BatchAction extends Action
      * @var integer 批量操作请求资源过多的错误编码。
      */
     public $manyResourcesCode;
+
+    /**
+     * @var string 多个ID时使用的分隔符。
+     */
+    public $idsSeparator;
     
     /**
      * @var callable 根据多个主键，获取多个模型的回调方法。
@@ -66,6 +71,10 @@ class BatchAction extends Action
     
         if ($this->manyResourcesCode === null) {
             $this->manyResourcesCode = 0;
+        }
+
+        if ($this->idsSeparator === null) {
+            $this->idsSeparator = ';';
         }
         
         parent::init();
@@ -109,7 +118,7 @@ class BatchAction extends Action
                 // composite primary key.
                 $condition = [];
                 foreach ($ids as $id) {
-                    $values = explode(',', $id);
+                    $values = explode($this->idSeparator, $id);
                     if (count($keys) === count($values)) {
                         $condition[] = array_combine($keys, $values);
                     }

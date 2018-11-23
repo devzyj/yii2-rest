@@ -105,7 +105,7 @@ class CreateAction extends Action
             
                 // 设置响应头。
                 if ($this->viewAction !== false) {
-                    $id = implode(',', array_values($model->getPrimaryKey(true)));
+                    $id = implode($this->idSeparator, array_values($model->getPrimaryKey(true)));
                     $this->response->getHeaders()->set('Location', Url::toRoute([$this->viewAction, 'id' => $id], true));
                 }
             

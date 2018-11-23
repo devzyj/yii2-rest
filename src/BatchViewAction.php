@@ -52,7 +52,7 @@ class BatchViewAction extends BatchAction
         }
         
         // 转换请求中的字符串IDs为数组。
-        $ids = $this->convertRequestIds($ids);
+        $ids = $this->convertRequestIds($ids, $this->idsSeparator);
         
         // 去除重复的ID。
         $ids = array_unique($ids);
@@ -67,7 +67,7 @@ class BatchViewAction extends BatchAction
         $models = $this->ensureModelsAccess($models);
         
         // 对模型列表使用主键索引。
-        $models->indexByPrimaryKey();
+        $models->indexByPrimaryKey($this->idSeparator);
         
         // 返回批量处理的结果。
         return Yii::createObject([

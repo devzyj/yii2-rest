@@ -74,7 +74,7 @@ class BatchDeleteAction extends BatchAction
         }
 
         // 转换请求中的字符串IDs为数组。
-        $ids = $this->convertRequestIds($ids);
+        $ids = $this->convertRequestIds($ids, $this->idsSeparator);
         
         // 去除重复的ID。
         $ids = array_unique($ids);
@@ -89,7 +89,7 @@ class BatchDeleteAction extends BatchAction
         $models = $this->ensureModelsAccess($models);
         
         // 对模型列表使用主键索引。
-        $models->indexByPrimaryKey();
+        $models->indexByPrimaryKey($this->idSeparator);
 
         // 批量处理结果。
         /* @var $result BatchResult */
